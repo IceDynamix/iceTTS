@@ -290,13 +290,15 @@
             if (self) { return; }
             tts(msg);
         });
-        client.connect().catch(console.error);
-        new bootstrap.Toast(document.getElementById("toast-connected")).show()
+        client.connect().then(() => {
+            new bootstrap.Toast(document.getElementById("toast-connected")).show()
+        }).catch(console.error);
     });
 
     document.querySelector("#disconnect").addEventListener("click", () => {
-        client.disconnect();
-        new bootstrap.Toast(document.getElementById("toast-disconnected")).show()
+        client.disconnect().then(() => {
+            new bootstrap.Toast(document.getElementById("toast-disconnected")).show()
+        }).catch(console.error);
     });
 </script>
 
