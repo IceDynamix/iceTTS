@@ -285,20 +285,27 @@
 
     document.querySelector("#connect").addEventListener("click", () => {
         client = new window.tmi.client({ channels: [document.querySelector("#channel").value] });
-        client.on("connected", () => { console.log(`* Connected to IRC`) });
+
+        client.on("connected", () => {
+            console.log(`Connected to IRC`);
+            new bootstrap.Toast(document.getElementById("toast-connected")).show();
+        });
+
+        client.on("disconnected", () => {
+            console.log(`Disconnected from IRC`);
+            new bootstrap.Toast(document.getElementById("toast-disconnected")).show()
+        });
+
         client.on("chat", (target, context, msg, self) => {
             if (self) { return; }
             tts(msg);
         });
-        client.connect().then(() => {
-            new bootstrap.Toast(document.getElementById("toast-connected")).show()
-        }).catch(console.error);
+
+        client.connect().catch(console.error);
     });
 
     document.querySelector("#disconnect").addEventListener("click", () => {
-        client.disconnect().then(() => {
-            new bootstrap.Toast(document.getElementById("toast-disconnected")).show()
-        }).catch(console.error);
+        client.disconnect().catch(console.error);
     });
 </script>
 
