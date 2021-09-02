@@ -101,11 +101,17 @@
         speech.pitch = document.querySelector("#pitch").value;
         speech.volume = document.querySelector("#volume").value;
 
-        guessLanguage.detect(text, lang => {
-            speech.lang = lang === "unknown" ? document.querySelector("#default-lang").value : lang;
+        if (document.querySelector("#multi-lang-scan").checked) {
+            guessLanguage.detect(text, lang => {
+                speech.lang = lang === "unknown" ? document.querySelector("#default-lang").value : lang;
+                speech.voice = window.speechSynthesis.getVoices().filter(v => v.lang === speech.lang)[0];
+                window.speechSynthesis.speak(speech);
+            });
+        } else {
+            speech.lang = document.querySelector("#default-lang").value;
             speech.voice = window.speechSynthesis.getVoices().filter(v => v.lang === speech.lang)[0];
             window.speechSynthesis.speak(speech);
-        });
+        }
     }
 </script>
 
@@ -298,6 +304,45 @@
 
         client.on("chat", (target, context, msg, self) => {
             if (self) { return; }
+
+            // Blacklist
+            if (["mikuia", "stay_hydrated_bot", "soundalerts"].includes(context.username)) return;
+
+            const filters = [
+                {
+                    find: /https?:\/\/(?:www\.)?([-a-zA-Z0-9@:%._\+~#=]{1,256})\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/gm,
+                    replace: "$1 url"
+                }, {
+                    find: /\.ppy/,
+                    replace: ""
+                }, {
+                    find: /\bcj\b/,
+                    replace: " chordjack "
+                }, {
+                    find: /\bjs\b/,
+                    replace: " jumpstream "
+                }, {
+                    find: /\bhs\b/,
+                    replace: " handstream "
+                }, {
+                    find: /\bjt\b/,
+                    replace: " jumptrill "
+                }, {
+                    find: /\bo!m\b/,
+                    replace: " osu mania "
+                }, {
+                    find: /\bquaver\b/,
+                    replace: " kayver "
+                }, {
+                    find: /\bosu\b/,
+                    replace: " oh su "
+                }, {
+                    find: /\bchonker\b/,
+                    replace: " chon ker "
+                }
+            ];
+
+            filters.forEach(({ find, replace }) => msg = msg.replace(find, replace));
             tts(msg);
         });
 
