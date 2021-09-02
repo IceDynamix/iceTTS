@@ -1,0 +1,303 @@
+<html lang="en">
+
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        #unmute {
+            position: fixed;
+            background-color: rgba(0, 0, 0, 0.8);
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 9999;
+            vertical-align: middle;
+            text-align: center;
+            transition-property: visibility, opacity;
+            transition-duration: 0.2s;
+            transition-timing-function: linear;
+        }
+    </style>
+    <title>iceTTS - Twitch Chat TTS</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
+</head>
+
+<body class="container mt-3 bg-dark">
+    <section class="my-3 bg-light p-3">
+        <h1>iceTTS - Twitch Chat TTS</h1>
+    </section>
+
+    <section class="my-3 bg-light p-3">
+        <h3>Speech Settings</h3>
+        <div class="row">
+            <div class="col">
+                <label for="volume" class="form-label">Volume</label>
+                <input type="range" class="form-range" min="0" max="1" value="0.25" step="0.1" id="volume" />
+                <span id="volume-label">1</span>
+            </div>
+            <div class="col">
+                <label for="rate" class="form-label">Rate</label>
+                <input type="range" class="form-range" min="0.1" max="10" value="1" step="0.1" id="rate" />
+                <span id="rate-label">1</span>
+            </div>
+            <div class="col">
+                <label for="pitch" class="form-label">Pitch</label>
+                <input type="range" class="form-range" min="0" max="2" value="1" step="0.1" id="pitch" />
+                <span id="pitch-label">1</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="my-3 bg-light p-3">
+        <h3>Language Settings</h3>
+        <p>Available languages depend on the installed TTS languages</p>
+
+        <label for="default-lang" class="form-label">Default Language</label>
+        <select id="default-lang" class="form-select"></select>
+        <div class="form-check form-switch mt-3">
+            <input class="form-check-input" type="checkbox" id="multi-lang-scan">
+            <label class="form-check-label" for="multi-lang-scan">
+                Detect multiple text languages from text
+                content
+            </label>
+        </div>
+    </section>
+
+    <section class="my-3 bg-light p-3">
+        <h3>Channel Settings</h3>
+        <div class="row">
+            <div class="col">
+                <label for="channel" class="form-label">Channel</label>
+                <input type="text" class="form-control" id="channel" />
+            </div>
+        </div>
+    </section>
+
+    <section class="my-3 bg-light p-3">
+        <button id="connect" class="btn btn-success me-3">Connect</button>
+        <button id="disconnect" class="btn btn-danger me-3">Disconnect</button>
+    </section>
+    <div class="toast-container position-fixed bottom-0 end-0 m-3">
+        <div id="toast-connected" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-body">
+                Connected to Twitch Chat
+            </div>
+        </div>
+        <div id="toast-disconnected" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-body">
+                Disconnected from Twitch Chat
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="tmi.min.js"></script>
+<script src="_languageData.js"></script>
+<script src="guessLanguage.js"></script>
+<script>
+    function tts(text) {
+        const speech = new SpeechSynthesisUtterance(text);
+        speech.rate = document.querySelector("#rate").value;
+        speech.pitch = document.querySelector("#pitch").value;
+        speech.volume = document.querySelector("#volume").value;
+
+        guessLanguage.detect(text, lang => {
+            speech.lang = lang === "unknown" ? document.querySelector("#default-lang").value : lang;
+            speech.voice = window.speechSynthesis.getVoices().filter(v => v.lang === speech.lang)[0];
+            window.speechSynthesis.speak(speech);
+        });
+    }
+</script>
+
+<script>
+    function updateRate() {
+        const rate = document.querySelector("#rate").value;
+        document.querySelector("#rate-label").innerHTML = rate;
+        localStorage.setItem("speechRate", rate);
+    }
+
+    function updateVolume() {
+        const volume = document.querySelector("#volume").value;
+        document.querySelector("#volume-label").innerHTML = volume;
+        localStorage.setItem("speechVolume", volume);
+    }
+
+    function updatePitch() {
+        const pitch = document.querySelector("#pitch").value;
+        document.querySelector("#pitch-label").innerHTML = pitch;
+        localStorage.setItem("speechPitch", pitch);
+    }
+
+    function updateChannel() {
+        const channel = document.querySelector("#channel").value;
+        localStorage.setItem("channel", channel);
+    }
+
+    function updateMultiLangScan() {
+        const multiLangScan = document.querySelector("#multi-lang-scan").checked;
+        localStorage.setItem("multiLangScan", multiLangScan);
+    }
+
+    document.querySelector("#rate").addEventListener("input", updateRate);
+    document.querySelector("#volume").addEventListener("input", updateVolume);
+    document.querySelector("#pitch").addEventListener("input", updatePitch);
+    document.querySelector("#channel").addEventListener("input", updateChannel);
+    document.querySelector("#multi-lang-scan").addEventListener("change", updateMultiLangScan);
+
+    const config = {
+        speechRate: localStorage.getItem("speechRate"),
+        speechVolume: localStorage.getItem("speechVolume"),
+        speechPitch: localStorage.getItem("speechPitch"),
+        channel: localStorage.getItem("channel"),
+        multiLangScan: localStorage.getItem("multiLangScan")
+    };
+
+    if (config.speechRate) {
+        document.querySelector("#rate").value = config.speechRate;
+        updateRate();
+    }
+    if (config.speechVolume) {
+        document.querySelector("#volume").value = config.speechVolume;
+        updateVolume();
+    }
+    if (config.speechPitch) {
+        document.querySelector("#pitch").value = config.speechPitch;
+        updatePitch();
+    }
+    if (config.channel) {
+        document.querySelector("#channel").value = config.channel;
+        updateChannel();
+    }
+    if (config.multiLangScan) {
+        document.querySelector("#multi-lang-scan").checked = config.multiLangScan;
+        updateMultiLangScan();
+    }
+
+    window.speechSynthesis.onvoiceschanged = () => {
+        const languages = window.speechSynthesis.getVoices().map(v => v.lang.slice(0, 2)).filter((v, i, self) => self.indexOf(v) === i);
+        const langNameMap = {
+            "ab": "Abkhazian",
+            "af": "Afrikaans",
+            "ar": "Arabic",
+            "az": "Azeri",
+            "be": "Belarusian",
+            "bg": "Bulgarian",
+            "bn": "Bengali",
+            "bo": "Tibetan",
+            "br": "Breton",
+            "ca": "Catalan",
+            "ceb": "Cebuano",
+            "cs": "Czech",
+            "cy": "Welsh",
+            "da": "Danish",
+            "de": "German",
+            "el": "Greek",
+            "en": "English",
+            "eo": "Esperanto",
+            "es": "Spanish",
+            "et": "Estonian",
+            "eu": "Basque",
+            "fa": "Farsi",
+            "fi": "Finnish",
+            "fo": "Faroese",
+            "fr": "French",
+            "fy": "Frisian",
+            "gd": "Scots Gaelic",
+            "gl": "Galician",
+            "gu": "Gujarati",
+            "ha": "Hausa",
+            "haw": "Hawaiian",
+            "he": "Hebrew",
+            "hi": "Hindi",
+            "hmn": "Pahawh Hmong",
+            "hr": "Croatian",
+            "hu": "Hungarian",
+            "hy": "Armenian",
+            "id": "Indonesian",
+            "is": "Icelandic",
+            "it": "Italian",
+            "ja": "Japanese",
+            "ka": "Georgian",
+            "kk": "Kazakh",
+            "km": "Cambodian",
+            "ko": "Korean",
+            "ku": "Kurdish",
+            "ky": "Kyrgyz",
+            "la": "Latin",
+            "lt": "Lithuanian",
+            "lv": "Latvian",
+            "mg": "Malagasy",
+            "mk": "Macedonian",
+            "ml": "Malayalam",
+            "mn": "Mongolian",
+            "mr": "Marathi",
+            "ms": "Malay",
+            "nd": "Ndebele",
+            "ne": "Nepali",
+            "nl": "Dutch",
+            "nn": "Nynorsk",
+            "no": "Norwegian",
+            "nso": "Sepedi",
+            "pa": "Punjabi",
+            "pl": "Polish",
+            "ps": "Pashto",
+            "pt": "Portuguese",
+            "pt-PT": "Portuguese (Portugal)",
+            "pt-BR": "Portuguese (Brazil)",
+            "ro": "Romanian",
+            "ru": "Russian",
+            "sa": "Sanskrit",
+            "bs": "Serbo-Croatian",
+            "sk": "Slovak",
+            "sl": "Slovene",
+            "so": "Somali",
+            "sq": "Albanian",
+            "sr": "Serbian",
+            "sv": "Swedish",
+            "sw": "Swahili",
+            "ta": "Tamil",
+            "te": "Telugu",
+            "th": "Thai",
+            "tl": "Tagalog",
+            "tlh": "Klingon",
+            "tn": "Setswana",
+            "tr": "Turkish",
+            "ts": "Tsonga",
+            "tw": "Twi",
+            "uk": "Ukrainian",
+            "ur": "Urdu",
+            "uz": "Uzbek",
+            "ve": "Venda",
+            "vi": "Vietnamese",
+            "xh": "Xhosa",
+            "zh": "Chinese",
+            "zh-TW": "Traditional Chinese (Taiwan)",
+            "zu": "Zulu"
+        };
+
+        const defaultLanguageSelect = document.querySelector("#default-lang");
+        languages.forEach((lang, i) => {
+            defaultLanguageSelect.options[i] = new Option(langNameMap[lang], lang);
+        });
+    };
+
+    let client;
+
+    document.querySelector("#connect").addEventListener("click", () => {
+        client = new window.tmi.client({ channels: [document.querySelector("#channel").value] });
+        client.on("connected", () => { console.log(`* Connected to IRC`) });
+        client.on("chat", (target, context, msg, self) => {
+            if (self) { return; }
+            tts(msg);
+        });
+        client.connect().catch(console.error);
+        new bootstrap.Toast(document.getElementById("toast-connected")).show()
+    });
+
+    document.querySelector("#disconnect").addEventListener("click", () => {
+        client.disconnect();
+        new bootstrap.Toast(document.getElementById("toast-disconnected")).show()
+    });
+</script>
+
+</html>
