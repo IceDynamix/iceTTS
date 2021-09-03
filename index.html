@@ -1,24 +1,8 @@
 <html lang="en">
 
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <style>
-        #unmute {
-            position: fixed;
-            background-color: rgba(0, 0, 0, 0.8);
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 9999;
-            vertical-align: middle;
-            text-align: center;
-            transition-property: visibility, opacity;
-            transition-duration: 0.2s;
-            transition-timing-function: linear;
-        }
-    </style>
     <title>iceTTS - Twitch Chat TTS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
 </head>
 
@@ -76,6 +60,7 @@
     <section class="my-3 bg-light p-3">
         <button id="connect" class="btn btn-success me-3">Connect</button>
         <button id="disconnect" class="btn btn-danger me-3">Disconnect</button>
+        <button id="test" class="btn btn-primary me-3">Test TTS Voice</button>
     </section>
     <div class="toast-container position-fixed bottom-0 end-0 m-3">
         <div id="toast-connected" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -313,31 +298,31 @@
                     find: /https?:\/\/(?:www\.)?([-a-zA-Z0-9@:%._\+~#=]{1,256})\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/gm,
                     replace: "$1 url"
                 }, {
-                    find: /\.ppy/,
+                    find: /\.ppy/g,
                     replace: ""
                 }, {
-                    find: /\bcj\b/,
+                    find: /\bcj\b/g,
                     replace: " chordjack "
                 }, {
-                    find: /\bjs\b/,
+                    find: /\bjs\b/g,
                     replace: " jumpstream "
                 }, {
-                    find: /\bhs\b/,
+                    find: /\bhs\b/g,
                     replace: " handstream "
                 }, {
-                    find: /\bjt\b/,
+                    find: /\bjt\b/g,
                     replace: " jumptrill "
                 }, {
-                    find: /\bo!m\b/,
+                    find: /\bo!m\b/g,
                     replace: " osu mania "
                 }, {
-                    find: /\bquaver\b/,
-                    replace: " kayver "
+                    find: /\bquaver\b/g,
+                    replace: " kuayver "
                 }, {
-                    find: /\bosu\b/,
+                    find: /\bosu\b/g,
                     replace: " oh su "
                 }, {
-                    find: /\bchonker\b/,
+                    find: /\bchonker\b/g,
                     replace: " chon ker "
                 }
             ];
@@ -350,8 +335,12 @@
     });
 
     document.querySelector("#disconnect").addEventListener("click", () => {
-        client.disconnect().catch(console.error);
+        if (client) client.disconnect().catch(console.error);
     });
+
+    document.querySelector("#test").addEventListener("click", () => {
+        tts("This is a test message");
+    })
 </script>
 
 </html>
