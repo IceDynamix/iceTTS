@@ -253,7 +253,7 @@ document.querySelector("#connect").addEventListener("click", () => {
         if (self) return;
         if (config.blacklist && config.blacklist.includes(context.username)) return;
         if (config.replacements)
-            config.replacements.forEach(({ find, replace }) => msg = msg.replace(new RegExp(find), replace));
+            config.replacements.forEach(({ find, replace }) => msg = msg.replace(new RegExp(find, "g"), replace));
 
         tts(msg);
     });
