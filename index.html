@@ -7,61 +7,75 @@
 </head>
 
 <body class="container mt-3 bg-dark">
-    <section class="my-3 bg-light p-3">
-        <h1>iceTTS - Twitch Chat TTS</h1>
-    </section>
-
-    <section class="my-3 bg-light p-3">
-        <h3>Speech Settings</h3>
-        <div class="row">
-            <div class="col">
-                <label for="volume" class="form-label">Volume</label>
-                <input type="range" class="form-range" min="0" max="1" value="0.25" step="0.1" id="volume" />
-                <span id="volume-label">1</span>
-            </div>
-            <div class="col">
-                <label for="rate" class="form-label">Rate</label>
-                <input type="range" class="form-range" min="0.1" max="10" value="1" step="0.1" id="rate" />
-                <span id="rate-label">1</span>
-            </div>
-            <div class="col">
-                <label for="pitch" class="form-label">Pitch</label>
-                <input type="range" class="form-range" min="0" max="2" value="1" step="0.1" id="pitch" />
-                <span id="pitch-label">1</span>
-            </div>
+    <div class="row g-3">
+        <div class="bg-light p-3">
+            <h1>iceTTS - Twitch Chat TTS</h1>
         </div>
-    </section>
 
-    <section class="my-3 bg-light p-3">
-        <h3>Language Settings</h3>
-        <p>Available languages depend on the installed TTS languages</p>
-
-        <label for="default-lang" class="form-label">Default Language</label>
-        <select id="default-lang" class="form-select"></select>
-        <div class="form-check form-switch mt-3">
-            <input class="form-check-input" type="checkbox" id="multi-lang-scan">
-            <label class="form-check-label" for="multi-lang-scan">
-                Detect multiple text languages from text
-                content
-            </label>
-        </div>
-    </section>
-
-    <section class="my-3 bg-light p-3">
-        <h3>Channel Settings</h3>
-        <div class="row">
-            <div class="col">
+        <div class="bg-light p-3">
+            <h3>Channel Settings</h3>
+            <div class="my-3">
                 <label for="channel" class="form-label">Channel</label>
                 <input type="text" class="form-control" id="channel" />
             </div>
+            <button id="connect" class="btn btn-success me-3">Connect</button>
+            <button id="disconnect" class="btn btn-danger me-3">Disconnect</button>
+            <button id="test" class="btn btn-primary me-3">Test TTS Voice</button>
         </div>
-    </section>
 
-    <section class="my-3 bg-light p-3">
-        <button id="connect" class="btn btn-success me-3">Connect</button>
-        <button id="disconnect" class="btn btn-danger me-3">Disconnect</button>
-        <button id="test" class="btn btn-primary me-3">Test TTS Voice</button>
-    </section>
+        <div class="bg-light p-3">
+            <h3>Speech Settings</h3>
+            <div class="row">
+                <label for="volume" class="col-2 form-label">Volume</label>
+                <input type="range" class="col form-range" min="0" max="1" value="0.25" step="0.1" id="volume" />
+                <span class="col-1" id="volume-label">0.25</span>
+            </div>
+            <div class="row">
+                <label for="rate" class="col-2 form-label">Rate</label>
+                <input type="range" class="col form-range" min="0.1" max="10" value="1.0" step="0.1" id="rate" />
+                <span class="col-1" id="rate-label">1.0</span>
+            </div>
+            <div class="row">
+                <label for="pitch" class="col-2 form-label">Pitch</label>
+                <input type="range" class="col form-range" min="0" max="2" value="1.0" step="0.1" id="pitch" />
+                <span class="col-1" id="pitch-label">1.0</span>
+            </div>
+        </div>
+
+        <div class="bg-light p-3">
+            <h3>Language Settings</h3>
+            <p>Available languages depend on the installed TTS languages</p>
+
+            <label for="default-lang" class="form-label">Default Language</label>
+            <select id="default-lang" class="form-select"></select>
+            <div class="form-check form-switch mt-3">
+                <input class="form-check-input" type="checkbox" id="multi-lang-scan">
+                <label class="form-check-label" for="multi-lang-scan">
+                    Detect multiple text languages from text
+                    content
+                </label>
+            </div>
+        </div>
+
+        <div class="bg-light p-3">
+            <h3>Filter Settings</h3>
+            <div class="row">
+                <div class="col">
+                    <label for="replacements" class="form-label">Text Replacements (uses <a
+                           href="https://en.wikipedia.org/wiki/Regular_expression">RegEx</a>)</label>
+                    <textarea class="form-control" id="replacements" rows="10"
+                              style="font-family:monospace;white-space: pre;overflow-wrap: normal;overflow-x: scroll;"></textarea>
+                    <p class="invalid-feedback" id="replacements-feedback"></p>
+                </div>
+                <div class="col-3">
+                    <label for="blacklist" class="form-label">User Blacklist</label>
+                    <textarea class="form-control" id="blacklist"
+                              placeholder="Newline separated list of users" rows="10"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="toast-container position-fixed bottom-0 end-0 m-3">
         <div id="toast-connected" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="toast-body">
@@ -101,32 +115,89 @@
 </script>
 
 <script>
+    let config = {};
+
+    function saveConfig() {
+        localStorage.setItem("iceTtsConfig", JSON.stringify(config));
+    }
+
+    function loadConfig() {
+        config = JSON.parse(localStorage.getItem("iceTtsConfig"));
+
+        if (config.speechRate) {
+            document.querySelector("#rate").value = config.speechRate;
+            updateRate();
+        }
+        if (config.speechVolume) {
+            document.querySelector("#volume").value = config.speechVolume;
+            updateVolume();
+        }
+        if (config.speechPitch) {
+            document.querySelector("#pitch").value = config.speechPitch;
+            updatePitch();
+        }
+        if (config.channel) document.querySelector("#channel").value = config.channel;
+        if (config.multiLangScan) document.querySelector("#multi-lang-scan").checked = config.multiLangScan;
+        if (config.blacklist) document.querySelector("#blacklist").value = config.blacklist.join("\n");
+        let defaultReplacement = [
+            {
+                find: "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()!@:%_\\+.~#?&\\/\\/=]*)",
+                replace: "$1 url"
+            }
+        ];
+
+        config.replacements = config.replacements || defaultReplacement;
+        document.querySelector("#replacements").value = JSON.stringify(config.replacements, null, 2);
+    }
+
     function updateRate() {
-        const rate = document.querySelector("#rate").value;
+        const rate = this.value;
+        config.speechRate = rate;
         document.querySelector("#rate-label").innerHTML = rate;
-        localStorage.setItem("speechRate", rate);
+        saveConfig();
     }
 
     function updateVolume() {
-        const volume = document.querySelector("#volume").value;
+        const volume = this.value;
+        config.speechVolume = volume;
         document.querySelector("#volume-label").innerHTML = volume;
-        localStorage.setItem("speechVolume", volume);
+        saveConfig();
     }
 
     function updatePitch() {
-        const pitch = document.querySelector("#pitch").value;
+        const pitch = this.value;
+        config.speechPitch = pitch;
         document.querySelector("#pitch-label").innerHTML = pitch;
-        localStorage.setItem("speechPitch", pitch);
+        saveConfig();
     }
 
     function updateChannel() {
-        const channel = document.querySelector("#channel").value;
-        localStorage.setItem("channel", channel);
+        config.channel = this.value;
+        saveConfig();
     }
 
     function updateMultiLangScan() {
-        const multiLangScan = document.querySelector("#multi-lang-scan").checked;
-        localStorage.setItem("multiLangScan", multiLangScan);
+        config.multiLangScan = this.checked;
+        saveConfig();
+    }
+
+    function updateBlacklist() {
+        config.blacklist = this.value.split("\n");
+        saveConfig();
+    }
+
+    function updateReplacements() {
+        let classList = this.classList;
+        try {
+            config.replacements = JSON.parse(this.value);
+            if (classList.contains("is-invalid")) classList.remove("is-invalid");
+            classList.add("is-valid");
+            saveConfig();
+        } catch (error) {
+            if (classList.contains("is-valid")) classList.remove("is-valid");
+            classList.add("is-invalid");
+            document.querySelector("#replacements-feedback").textContent = "JSON is invalid";
+        }
     }
 
     document.querySelector("#rate").addEventListener("input", updateRate);
@@ -134,35 +205,10 @@
     document.querySelector("#pitch").addEventListener("input", updatePitch);
     document.querySelector("#channel").addEventListener("input", updateChannel);
     document.querySelector("#multi-lang-scan").addEventListener("change", updateMultiLangScan);
+    document.querySelector("#blacklist").addEventListener("input", updateBlacklist);
+    document.querySelector("#replacements").addEventListener("input", updateReplacements);
 
-    const config = {
-        speechRate: localStorage.getItem("speechRate"),
-        speechVolume: localStorage.getItem("speechVolume"),
-        speechPitch: localStorage.getItem("speechPitch"),
-        channel: localStorage.getItem("channel"),
-        multiLangScan: localStorage.getItem("multiLangScan")
-    };
-
-    if (config.speechRate) {
-        document.querySelector("#rate").value = config.speechRate;
-        updateRate();
-    }
-    if (config.speechVolume) {
-        document.querySelector("#volume").value = config.speechVolume;
-        updateVolume();
-    }
-    if (config.speechPitch) {
-        document.querySelector("#pitch").value = config.speechPitch;
-        updatePitch();
-    }
-    if (config.channel) {
-        document.querySelector("#channel").value = config.channel;
-        updateChannel();
-    }
-    if (config.multiLangScan) {
-        document.querySelector("#multi-lang-scan").checked = config.multiLangScan;
-        updateMultiLangScan();
-    }
+    loadConfig();
 
     window.speechSynthesis.onvoiceschanged = () => {
         const languages = window.speechSynthesis.getVoices().map(v => v.lang.slice(0, 2)).filter((v, i, self) => self.indexOf(v) === i);
@@ -288,46 +334,11 @@
         });
 
         client.on("chat", (target, context, msg, self) => {
-            if (self) { return; }
+            if (self) return;
+            if (config.blacklist && config.blacklist.includes(context.username)) return;
+            if (config.replacements)
+                config.replacements.forEach(({ find, replace }) => msg = msg.replace(new RegExp(find), replace));
 
-            // Blacklist
-            if (["mikuia", "stay_hydrated_bot", "soundalerts"].includes(context.username)) return;
-
-            const filters = [
-                {
-                    find: /https?:\/\/(?:www\.)?([-a-zA-Z0-9@:%._\+~#=]{1,256})\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()!@:%_\+.~#?&\/\/=]*)/gm,
-                    replace: "$1 url"
-                }, {
-                    find: /\.ppy/g,
-                    replace: ""
-                }, {
-                    find: /\bcj\b/g,
-                    replace: " chordjack "
-                }, {
-                    find: /\bjs\b/g,
-                    replace: " jumpstream "
-                }, {
-                    find: /\bhs\b/g,
-                    replace: " handstream "
-                }, {
-                    find: /\bjt\b/g,
-                    replace: " jumptrill "
-                }, {
-                    find: /\bo!m\b/g,
-                    replace: " osu mania "
-                }, {
-                    find: /\bquaver\b/g,
-                    replace: " kuayver "
-                }, {
-                    find: /\bosu\b/g,
-                    replace: " oh su "
-                }, {
-                    find: /\bchonker\b/g,
-                    replace: " chon ker "
-                }
-            ];
-
-            filters.forEach(({ find, replace }) => msg = msg.replace(find, replace));
             tts(msg);
         });
 
