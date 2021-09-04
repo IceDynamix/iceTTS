@@ -237,6 +237,8 @@ window.speechSynthesis.onvoiceschanged = () => {
 let client;
 
 document.querySelector("#connect").addEventListener("click", () => {
+    if (client) return; // Already connected
+
     client = new window.tmi.client({ channels: [document.querySelector("#channel").value] });
 
     client.on("connected", () => {
@@ -258,11 +260,18 @@ document.querySelector("#connect").addEventListener("click", () => {
         tts(msg);
     });
 
-    client.connect().catch(console.error);
+    client.connect().then(() => {
+        document.getElementById("disconnect").style.display = "inline-block";
+        document.getElementById("connect").style.display = "none";
+    }).catch(console.error);
 });
 
 document.querySelector("#disconnect").addEventListener("click", () => {
-    if (client) client.disconnect().catch(console.error);
+    if (client) client.disconnect().then(() => {
+        client = null;
+        document.getElementById("disconnect").style.display = "none";
+        document.getElementById("connect").style.display = "inline-block";
+    }).catch(console.error);
 });
 
 document.querySelector("#test").addEventListener("click", () => {
