@@ -46,7 +46,7 @@
             <h3>Language Settings</h3>
 
             <label for="default-lang" class="form-label">Default Language <small class="text-muted">(available languages
-                    depend on locally installed TTS languages)</small></label>
+                depend on locally installed TTS languages)</small></label>
             <select id="default-lang" class="form-select"></select>
             <div class="form-check form-switch mt-3">
                 <input class="form-check-input" type="checkbox" id="multi-lang-scan">
@@ -57,11 +57,31 @@
         </div>
 
         <div class="bg-light p-3">
+            <h3>Usernames</h3>
+
+            <div class="form-check form-switch mt-3">
+                <input class="form-check-input" type="checkbox" id="read-username">
+                <label class="form-check-label" for="read-username">
+                    Read username before each message
+                </label>
+            </div>
+            <label for="username-aliases" class="form-label">Username aliases<br />
+                <small class="text-muted">
+                    As key, you can either use the user's display name (what you see in chat)
+                    or their username (go to their Twitch profile and look at the URL in your address bar).
+                </small>
+            </label>
+            <textarea class="form-control" id="username-aliases" rows="10"
+                      style="font-family:monospace;white-space: pre;overflow-wrap: normal;overflow-x: scroll;"></textarea>
+            <p class="invalid-feedback" id="username-aliases-feedback"></p>
+        </div>
+
+        <div class="bg-light p-3">
             <h3>Filter Settings</h3>
             <div class="row">
                 <div class="col">
                     <label for="replacements" class="form-label">Text Replacements <small>(uses <a
-                               href="https://en.wikipedia.org/wiki/Regular_expression">RegEx</a>)</small></label>
+                           href="https://en.wikipedia.org/wiki/Regular_expression">RegEx</a>)</small></label>
                     <textarea class="form-control" id="replacements" rows="10"
                               style="font-family:monospace;white-space: pre;overflow-wrap: normal;overflow-x: scroll;"></textarea>
                     <p class="invalid-feedback" id="replacements-feedback"></p>

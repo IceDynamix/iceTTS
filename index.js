@@ -23,6 +23,8 @@ let config = {
     speechPitch: 1.0,
     channel: "",
     multiLangScan: true,
+    readUsername: false,
+    usernameAliases: {"username1": "peter", "username2": "walter"},
     blacklist: [],
     replacements: [
         {
@@ -60,10 +62,12 @@ function loadConfig() {
     }
     if (config.channel) document.querySelector("#channel").value = config.channel;
     if (config.multiLangScan) document.querySelector("#multi-lang-scan").checked = config.multiLangScan;
-    if (config.blacklist) document.querySelector("#blacklist").value = config.blacklist.join("\n");
 
-    config.replacements = config.replacements || defaultReplacement;
-    document.querySelector("#replacements").value = JSON.stringify(config.replacements, null, 2);
+    if (config.readUsername) document.querySelector("#read-username").checked = config.readUsername;
+    if (config.usernameAliases) document.querySelector("#username-aliases").value = JSON.stringify(config.usernameAliases, null, 2);
+
+    if (config.blacklist) document.querySelector("#blacklist").value = config.blacklist.join("\n");
+    if (config.replacements) document.querySelector("#replacements").value = JSON.stringify(config.replacements, null, 2);
 }
 
 function updateRate() {
@@ -97,6 +101,25 @@ function updateMultiLangScan() {
     saveConfig();
 }
 
+function updateReadUsername() {
+    config.readUsername = document.querySelector("#read-username").checked;
+    saveConfig();
+}
+
+function updateUsernameAliases() {
+    let classList = document.querySelector("#username-aliases").classList;
+    try {
+        config.usernameAliases = JSON.parse(document.querySelector("#username-aliases").value);
+        if (classList.contains("is-invalid")) classList.remove("is-invalid");
+        classList.add("is-valid");
+        saveConfig();
+    } catch (error) {
+        if (classList.contains("is-valid")) classList.remove("is-valid");
+        classList.add("is-invalid");
+        document.querySelector("#username-aliases-feedback").textContent = "JSON is invalid";
+    }
+}
+
 function updateBlacklist() {
     config.blacklist = document.querySelector("#blacklist").value.split("\n");
     saveConfig();
@@ -121,6 +144,8 @@ document.querySelector("#volume").addEventListener("input", updateVolume);
 document.querySelector("#pitch").addEventListener("input", updatePitch);
 document.querySelector("#channel").addEventListener("input", updateChannel);
 document.querySelector("#multi-lang-scan").addEventListener("change", updateMultiLangScan);
+document.querySelector("#read-username").addEventListener("change", updateReadUsername);
+document.querySelector("#username-aliases").addEventListener("input", updateUsernameAliases);
 document.querySelector("#blacklist").addEventListener("input", updateBlacklist);
 document.querySelector("#replacements").addEventListener("input", updateReplacements);
 
@@ -256,7 +281,15 @@ document.querySelector("#connect").addEventListener("click", () => {
         if (config.blacklist && config.blacklist.includes(context.username)) return;
         if (config.replacements)
             config.replacements.forEach(({ find, replace }) => msg = msg.replace(new RegExp(find, "g"), replace));
-
+        if (config.readUsername) {
+            let username = context["display-name"];
+            if (context.username in config.usernameAliases) {
+                username = config.usernameAliases[context.username];
+            } else if (username in config.usernameAliases) {
+                username = config.usernameAliases[username];
+            }
+            msg = username + ": " + msg;
+        }
         tts(msg);
     });
 
