@@ -25,19 +25,48 @@ document.querySelector("#username-aliases").addEventListener("input", updateUser
 document.querySelector("#blacklist").addEventListener("input", updateBlacklist);
 document.querySelector("#replacements").addEventListener("input", updateReplacements);
 
+document.querySelector("#save-settings").addEventListener("click", onClickSettingsSave);
+
 loadConfig();
 
 function saveConfig() {
     localStorage.setItem("iceTtsConfig", JSON.stringify(config));
+    document.querySelector("#settings").value = JSON.stringify(config, null, 2);
+}
+
+function readConfig(configString) {
+    let newConfig = JSON.parse(configString)
+    config = Object.assign(config, newConfig);
+
+}
+
+function onClickSettingsSave() {
+    let classList = document.querySelector("#settings").classList;
+    try {
+        let customConfigString = document.querySelector("#settings").value;
+        readConfig(customConfigString);
+
+        if (classList.contains("is-invalid")) classList.remove("is-invalid");
+        classList.add("is-valid");
+
+        saveConfig();
+        loadConfig();
+    } catch (error) {
+        console.error("Could not read custom config string", error);
+
+        if (classList.contains("is-valid")) classList.remove("is-valid");
+        classList.add("is-invalid");
+
+        document.querySelector("#settings-feedback").textContent = "JSON is invalid";
+    }
 }
 
 function loadConfig() {
     if (localStorage.getItem("iceTtsConfig")) {
         try {
-            let savedConfig = JSON.parse(localStorage.getItem("iceTtsConfig"))
-            config = Object.assign(config, savedConfig);
+            readConfig(localStorage.getItem("iceTtsConfig"));
         } catch (error) {
-            console.error("Could not read iceTtsConfig from localStorage", error);
+            console.error("Could not read iceTtsConfig from local storage", error);
         }
     }
 
@@ -138,7 +167,6 @@ function updateReplacements() {
         document.querySelector("#replacements-feedback").textContent = "JSON is invalid";
     }
 }
-
 
 window.speechSynthesis.onvoiceschanged = () => {
     const languages = window.speechSynthesis.getVoices().map(v => v.lang.slice(0, 2)).filter((v, i, self) => self.indexOf(v) === i);
