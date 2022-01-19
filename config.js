@@ -15,6 +15,18 @@ let config = {
     ]
 };
 
+document.querySelector("#rate").addEventListener("input", updateRate);
+document.querySelector("#volume").addEventListener("input", updateVolume);
+document.querySelector("#pitch").addEventListener("input", updatePitch);
+document.querySelector("#channel").addEventListener("input", updateChannel);
+document.querySelector("#multi-lang-scan").addEventListener("change", updateMultiLangScan);
+document.querySelector("#read-username").addEventListener("change", updateReadUsername);
+document.querySelector("#username-aliases").addEventListener("input", updateUsernameAliases);
+document.querySelector("#blacklist").addEventListener("input", updateBlacklist);
+document.querySelector("#replacements").addEventListener("input", updateReplacements);
+
+loadConfig();
+
 function saveConfig() {
     localStorage.setItem("iceTtsConfig", JSON.stringify(config));
 }
@@ -41,6 +53,7 @@ function loadConfig() {
         document.querySelector("#pitch").value = config.speechPitch;
         updatePitch();
     }
+
     if (config.channel) document.querySelector("#channel").value = config.channel;
     if (config.multiLangScan) document.querySelector("#multi-lang-scan").checked = config.multiLangScan;
 
@@ -53,21 +66,21 @@ function loadConfig() {
 
 function updateRate() {
     const rate = document.querySelector("#rate").value;
-    config.speechRate = rate;
+    config.speechRate = parseFloat(rate);
     document.querySelector("#rate-label").innerHTML = rate;
     saveConfig();
 }
 
 function updateVolume() {
     const volume = document.querySelector("#volume").value;
-    config.speechVolume = volume;
+    config.speechVolume = parseFloat(volume);
     document.querySelector("#volume-label").innerHTML = volume;
     saveConfig();
 }
 
 function updatePitch() {
     const pitch = document.querySelector("#pitch").value;
-    config.speechPitch = pitch;
+    config.speechPitch = parseFloat(pitch);
     document.querySelector("#pitch-label").innerHTML = pitch;
     saveConfig();
 }
@@ -120,17 +133,6 @@ function updateReplacements() {
     }
 }
 
-document.querySelector("#rate").addEventListener("input", updateRate);
-document.querySelector("#volume").addEventListener("input", updateVolume);
-document.querySelector("#pitch").addEventListener("input", updatePitch);
-document.querySelector("#channel").addEventListener("input", updateChannel);
-document.querySelector("#multi-lang-scan").addEventListener("change", updateMultiLangScan);
-document.querySelector("#read-username").addEventListener("change", updateReadUsername);
-document.querySelector("#username-aliases").addEventListener("input", updateUsernameAliases);
-document.querySelector("#blacklist").addEventListener("input", updateBlacklist);
-document.querySelector("#replacements").addEventListener("input", updateReplacements);
-
-loadConfig();
 
 window.speechSynthesis.onvoiceschanged = () => {
     const languages = window.speechSynthesis.getVoices().map(v => v.lang.slice(0, 2)).filter((v, i, self) => self.indexOf(v) === i);
