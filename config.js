@@ -67,21 +67,21 @@ function loadConfig() {
 function updateRate() {
     const rate = document.querySelector("#rate").value;
     config.speechRate = parseFloat(rate);
-    document.querySelector("#rate-label").innerHTML = rate;
+    document.querySelector("#rate-label").innerHTML = `${config.speechRate.toFixed(1)}x`;
     saveConfig();
 }
 
 function updateVolume() {
     const volume = document.querySelector("#volume").value;
     config.speechVolume = parseFloat(volume);
-    document.querySelector("#volume-label").innerHTML = volume;
+    document.querySelector("#volume-label").innerHTML = `${(config.speechVolume * 100).toFixed(0)}%`;
     saveConfig();
 }
 
 function updatePitch() {
     const pitch = document.querySelector("#pitch").value;
     config.speechPitch = parseFloat(pitch);
-    document.querySelector("#pitch-label").innerHTML = pitch;
+    document.querySelector("#pitch-label").innerHTML = config.speechPitch;
     saveConfig();
 }
 
@@ -104,12 +104,15 @@ function updateUsernameAliases() {
     let classList = document.querySelector("#username-aliases").classList;
     try {
         config.usernameAliases = JSON.parse(document.querySelector("#username-aliases").value);
+
         if (classList.contains("is-invalid")) classList.remove("is-invalid");
         classList.add("is-valid");
+
         saveConfig();
     } catch (error) {
         if (classList.contains("is-valid")) classList.remove("is-valid");
         classList.add("is-invalid");
+
         document.querySelector("#username-aliases-feedback").textContent = "JSON is invalid";
     }
 }
@@ -123,12 +126,15 @@ function updateReplacements() {
     let classList = document.querySelector("#replacements").classList;
     try {
         config.replacements = JSON.parse(document.querySelector("#replacements").value);
+
         if (classList.contains("is-invalid")) classList.remove("is-invalid");
         classList.add("is-valid");
+
         saveConfig();
     } catch (error) {
         if (classList.contains("is-valid")) classList.remove("is-valid");
         classList.add("is-invalid");
+
         document.querySelector("#replacements-feedback").textContent = "JSON is invalid";
     }
 }

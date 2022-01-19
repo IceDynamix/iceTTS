@@ -31,9 +31,9 @@ function onClickConnect() {
         return; // Already connected
 
     client = new window.tmi.client({ channels: [document.querySelector("#channel").value] });
+
     client.on("connected", onConnected);
     client.on("disconnected", onDisconnected);
-
     client.on("chat", onMessage);
 
     client.connect().then(() => {
@@ -43,12 +43,12 @@ function onClickConnect() {
 }
 
 function onClickDisconnect() {
-    if (client)
-        client.disconnect().then(() => {
-            client = null;
-            document.getElementById("disconnect").style.display = "none";
-            document.getElementById("connect").style.display = "inline-block";
-        }).catch(console.error);;
+    if (!client) return;
+    client.disconnect().then(() => {
+        client = null;
+        document.getElementById("disconnect").style.display = "none";
+        document.getElementById("connect").style.display = "inline-block";
+    }).catch(console.error);;
 }
 
 function onMessage(target, context, msg, self) {
