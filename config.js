@@ -15,7 +15,7 @@ let config = {
     ]
 };
 
-document.querySelector("#rate").addEventListener("input", updateRate);
+document.querySelector("#rate").addEventListener("input", _ => updateRate(true));
 document.querySelector("#volume").addEventListener("input", updateVolume);
 document.querySelector("#pitch").addEventListener("input", updatePitch);
 document.querySelector("#channel").addEventListener("input", updateChannel);
@@ -93,9 +93,12 @@ function loadConfig() {
     if (config.replacements) document.querySelector("#replacements").value = JSON.stringify(config.replacements, null, 2);
 }
 
-function updateRate() {
-    const rate = document.querySelector("#rate").value;
-    config.speechRate = parseFloat(rate);
+function updateRate(forceChange) {
+    // Don't overwrite custom values that were written manually into the JSON config
+    if (forceChange || config.speechRate <= 2) {
+        const rate = document.querySelector("#rate").value;
+        config.speechRate = parseFloat(rate);
+    }
     document.querySelector("#rate-label").innerHTML = `${config.speechRate.toFixed(1)}x`;
     saveConfig();
 }
