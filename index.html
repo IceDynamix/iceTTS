@@ -18,7 +18,8 @@
     </settings-section>
     <settings-section title="Speech Settings">
         <input-slider-percentage
-                v-model="config.speechVolume" id="volume" placeholder="Volume" label="Volume" min="0" max="1" step="0.05"
+                v-model="config.speechVolume" id="volume" placeholder="Volume" label="Volume" min="0" max="1"
+                step="0.05"
         ></input-slider-percentage>
         <input-slider-percentage
                 v-model="config.speechRate" id="rate" placeholder="Rate" label="Rate" min="0" max="2" step="0.05"
@@ -27,7 +28,13 @@
                 v-model="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" min="0" max="2" step="0.05"
         ></input-slider-percentage>
     </settings-section>
-    <settings-section title="Language Settings"></settings-section>
+    <settings-section title="Language Settings">
+        <input-select
+                v-model="config.defaultLang" id="defaultLang"
+                label="Default Language (available languages depend on locally installed TTS languages)"
+                :items="[1,2,3,4,5]"
+        ></input-select>
+    </settings-section>
     <settings-section title="Other Settings"></settings-section>
 </div>
 </body>
@@ -150,11 +157,29 @@
         emits: ["update:modelValue"],
         template: `
           <div class="row">
-          <label for="{{id}}" class="col-2 form-label">{{ label }}</label>
+          <label :for="id" class="col-2 form-label">{{ label }}</label>
           <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
-                 class="col form-range" id="{{id}}"
+                 class="col form-range" :id="id"
                  type="range" :min="0" :max="max" step="0.05"/>
           <span class="col-1">{{ Math.round(modelValue * 100) }}%</span>
+          </div>
+        `
+    });
+
+    app.component("input-select", {
+        props: ["modelValue", "id", "label", "labelValue", "placeholder", "items"],
+        emits: ["update:modelValue"],
+        template: `
+          <div class="row">
+          <div class="col">
+            <label :for="id" class="form-label">
+              {{ label }}
+            </label>
+            <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :id="id"
+                    class="form-select">
+              <option v-for="item in items" :value="item" :selected="item === modelValue">{{ item }}</option>
+            </select>
+          </div>
           </div>
         `
     });
