@@ -29,14 +29,121 @@ const defaultConfig = {
 
 const localStorageKey = "iceTtsConfig";
 
+const langNameMap = {
+    "ab": "Abkhazian",
+    "af": "Afrikaans",
+    "ar": "Arabic",
+    "az": "Azeri",
+    "be": "Belarusian",
+    "bg": "Bulgarian",
+    "bn": "Bengali",
+    "bo": "Tibetan",
+    "br": "Breton",
+    "ca": "Catalan",
+    "ceb": "Cebuano",
+    "cs": "Czech",
+    "cy": "Welsh",
+    "da": "Danish",
+    "de": "German",
+    "el": "Greek",
+    "en": "English",
+    "eo": "Esperanto",
+    "es": "Spanish",
+    "et": "Estonian",
+    "eu": "Basque",
+    "fa": "Farsi",
+    "fi": "Finnish",
+    "fo": "Faroese",
+    "fr": "French",
+    "fy": "Frisian",
+    "gd": "Scots Gaelic",
+    "gl": "Galician",
+    "gu": "Gujarati",
+    "ha": "Hausa",
+    "haw": "Hawaiian",
+    "he": "Hebrew",
+    "hi": "Hindi",
+    "hmn": "Pahawh Hmong",
+    "hr": "Croatian",
+    "hu": "Hungarian",
+    "hy": "Armenian",
+    "id": "Indonesian",
+    "is": "Icelandic",
+    "it": "Italian",
+    "ja": "Japanese",
+    "ka": "Georgian",
+    "kk": "Kazakh",
+    "km": "Cambodian",
+    "ko": "Korean",
+    "ku": "Kurdish",
+    "ky": "Kyrgyz",
+    "la": "Latin",
+    "lt": "Lithuanian",
+    "lv": "Latvian",
+    "mg": "Malagasy",
+    "mk": "Macedonian",
+    "ml": "Malayalam",
+    "mn": "Mongolian",
+    "mr": "Marathi",
+    "ms": "Malay",
+    "nd": "Ndebele",
+    "ne": "Nepali",
+    "nl": "Dutch",
+    "nn": "Nynorsk",
+    "no": "Norwegian",
+    "nso": "Sepedi",
+    "pa": "Punjabi",
+    "pl": "Polish",
+    "ps": "Pashto",
+    "pt": "Portuguese",
+    "pt-PT": "Portuguese (Portugal)",
+    "pt-BR": "Portuguese (Brazil)",
+    "ro": "Romanian",
+    "ru": "Russian",
+    "sa": "Sanskrit",
+    "bs": "Serbo-Croatian",
+    "sk": "Slovak",
+    "sl": "Slovene",
+    "so": "Somali",
+    "sq": "Albanian",
+    "sr": "Serbian",
+    "sv": "Swedish",
+    "sw": "Swahili",
+    "ta": "Tamil",
+    "te": "Telugu",
+    "th": "Thai",
+    "tl": "Tagalog",
+    "tlh": "Klingon",
+    "tn": "Setswana",
+    "tr": "Turkish",
+    "ts": "Tsonga",
+    "tw": "Twi",
+    "uk": "Ukrainian",
+    "ur": "Urdu",
+    "uz": "Uzbek",
+    "ve": "Venda",
+    "vi": "Vietnamese",
+    "xh": "Xhosa",
+    "zh": "Chinese",
+    "zh-TW": "Traditional Chinese (Taiwan)",
+    "zu": "Zulu"
+};
+
 const app = createApp({
     data() {
         return {
-            config: {}
+            config: {},
+            availableLanguages: []
         }
     },
     created() {
         this.loadConfig();
+
+        window.speechSynthesis.onvoiceschanged = () => {
+            this.availableLanguages = window.speechSynthesis.getVoices()
+                .map(v => langNameMap[v.lang.slice(0, 2)]) // get full name
+                .filter((v, i, self) => self.indexOf(v) === i); // unique
+        };
     },
     watch: {
         config: {

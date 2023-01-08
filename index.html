@@ -37,7 +37,7 @@
                 <input-select
                         v-model="config.defaultLang" id="defaultLang"
                         label="Default Language (available languages depend on locally installed TTS languages)"
-                        :items="[1,2,3,4,5]"
+                        :items="availableLanguages"
                 ></input-select>
                 <input-checkbox
                         v-model="config.multiLangScan"
