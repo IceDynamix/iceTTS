@@ -85,6 +85,26 @@ const app = createApp({
             localStorage.setItem(localStorageKey, JSON.stringify(defaultConfig));
             this.config = defaultConfig;
             console.log("Reset iceTtsConfig");
+        },
+
+        tts(text) {
+            const speech = new SpeechSynthesisUtterance(text);
+
+            speech.rate = this.config.speechRate;
+            speech.pitch = this.config.speechPitch;
+            speech.volume = this.config.speechVolume;
+
+            const defaultLang = this.config.defaultLang;
+
+            function speak(lang) {
+                if (lang === "unknown") console.log(`Could not detect language for ${text}`);
+                speech.lang = lang === "unknown" ? defaultLang : lang;
+                speech.voice = window.speechSynthesis.getVoices().filter(v => v.lang === speech.lang)[0];
+                window.speechSynthesis.speak(speech);
+                console.log(`Spoke message '${text}' in ' ${lang}'`);
+            }
+
+            speak(defaultLang);
         }
     }
 });

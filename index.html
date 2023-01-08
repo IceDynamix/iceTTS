@@ -29,6 +29,7 @@
                 <input-slider-percentage
                         v-model.number="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" max="2"
                 ></input-slider-percentage>
+                <app-button label="Test TTS voice" @click="tts('This is a test message')"></app-button>
             </settings-section>
         </div>
         <div class="col">
@@ -45,8 +46,6 @@
             </settings-section>
         </div>
     </div>
-
-
 
     <div class="row">
         <div class="col">
