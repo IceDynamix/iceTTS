@@ -9,20 +9,35 @@
 
 <body class="container bg-dark">
 <div id="app">
-    <div class="bg-light p-3 m-3">
-        <p>{{ message }}</p>
-    </div>
+    <settings-section>
+        <h1>iceTTS - Twitch Chat TTS</h1>
+    </settings-section>
+
+    <settings-section title="Channel Settings"></settings-section>
+    <settings-section title="Speech Settings"></settings-section>
+    <settings-section title="Language Settings"></settings-section>
+    <settings-section title="Other Settings"></settings-section>
 </div>
 </body>
 
 <script>
     const {createApp} = Vue;
-    createApp({
+
+    const app = createApp({
         data() {
             return {
                 message: 'Hello Vue!'
             }
         }
-    }).mount('#app')
+    });
+
+    app.component(
+        'settings-section',
+        {
+            props: ['title'],
+            template: `<div class="bg-light p-3 m-3"><h3>{{ title }}</h3><slot></slot></div>`
+        });
+
+    app.mount('#app');
 </script>
 </html>
