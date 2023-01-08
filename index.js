@@ -92,68 +92,90 @@ app.component(
     {
         props: ['title'],
         template: `
-              <div class="bg-light p-3 m-3">
-              <h3>{{ title }}</h3>
-              <slot></slot>
-              </div>`
+          <div class="bg-light p-3 m-3">
+          <h3>{{ title }}</h3>
+          <slot></slot>
+          </div>`
     });
 
 app.component("input-text", {
     props: ["modelValue", "id", "label", "placeholder"],
     emits: ["update:modelValue"],
     template: `
-          <div class="row">
-          <label for="channel" class="form-label">{{ label }}</label>
-          <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
-                 type="text" class="form-control" :placeholder="placeholder" :id="id"/>
-          </div>
-        `
+      <div class="row">
+      <label for="channel" class="form-label">{{ label }}</label>
+      <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+             type="text" class="form-control" :placeholder="placeholder" :id="id"/>
+      </div>
+    `
 });
 
 app.component("input-slider-percentage", {
     props: ["modelValue", "id", "label", "labelValue", "placeholder", "max"],
     emits: ["update:modelValue"],
     template: `
-          <div class="row">
-          <label :for="id" class="col-2 form-label">{{ label }}</label>
-          <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
-                 class="col form-range" :id="id"
-                 type="range" :min="0" :max="max" step="0.05"/>
-          <span class="col-1">{{ Math.round(modelValue * 100) }}%</span>
-          </div>
-        `
+      <div class="row">
+      <label :for="id" class="col-2 form-label">{{ label }}</label>
+      <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+             class="col form-range" :id="id"
+             type="range" :min="0" :max="max" step="0.05"/>
+      <span class="col-1">{{ Math.round(modelValue * 100) }}%</span>
+      </div>
+    `
 });
 
 app.component("input-select", {
     props: ["modelValue", "id", "label", "labelValue", "placeholder", "items"],
     emits: ["update:modelValue"],
     template: `
-          <div class="row">
-          <div class="col">
-            <label :for="id" class="form-label">
-              {{ label }}
-            </label>
-            <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :id="id"
-                    class="form-select">
-              <option v-for="item in items" :value="item" :selected="item === modelValue">{{ item }}</option>
-            </select>
-          </div>
-          </div>
-        `
+      <div class="row">
+      <div class="col">
+        <label :for="id" class="form-label">
+          {{ label }}
+        </label>
+        <select :value="modelValue" @input="$emit('update:modelValue', $event.target.value)" :id="id"
+                class="form-select">
+          <option v-for="item in items" :value="item" :selected="item === modelValue">{{ item }}</option>
+        </select>
+      </div>
+      </div>
+    `
 });
 
 app.component("input-checkbox", {
     props: ["modelValue", "id", "label"],
     emits: ["update:modelValue"],
     template: `
-          <div class="form-check form-switch mt-3">
-          <input :checked="modelValue" @change="$emit('update:modelValue', $event.target.checked)"
-                 class="form-check-input" type="checkbox" :id="id">
-          <label class="form-check-label" :for="id">
-            {{ label }}
-          </label>
+      <div class="form-check form-switch mt-3">
+      <input :checked="modelValue" @change="$emit('update:modelValue', $event.target.checked)"
+             class="form-check-input" type="checkbox" :id="id">
+      <label class="form-check-label" :for="id">
+        {{ label }}
+      </label>
+      </div>
+    `
+});
+
+app.component('modal', {
+    props: ['id', 'title'],
+    template: `
+      <div class="modal fade" :id="id" tabindex="-1" aria-labelledby="{{id}}Label" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="{{id}}Label">{{ title }}</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-        `
+          <div class="modal-body">
+            <slot></slot>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+      </div>
+    `
 });
 
 app.mount('#app');
