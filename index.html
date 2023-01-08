@@ -13,8 +13,12 @@
         <h1>iceTTS - Twitch Chat TTS</h1>
     </settings-section>
 
-    <settings-section title="Channel Settings"></settings-section>
-    <settings-section title="Speech Settings"></settings-section>
+    <settings-section title="Channel Settings">
+        <input-text v-model="config.channel" placeholder="Channel Name" label="Channel Name"></input-text>
+    </settings-section>
+    <settings-section title="Speech Settings">
+
+    </settings-section>
     <settings-section title="Language Settings"></settings-section>
     <settings-section title="Other Settings"></settings-section>
 </div>
@@ -23,10 +27,89 @@
 <script>
     const {createApp} = Vue;
 
+    const defaultConfig = {
+        channel: "",
+        speechRate: 1.0,
+        speechVolume: 0.5,
+        speechPitch: 1.0,
+        defaultLang: '',
+        multiLangScan: true,
+        readUsername: false,
+        usernameAliases: [],
+        enableReplacements: false,
+        replacements: [
+            {
+                find: "asshole",
+                replace: "a-hole"
+            },
+            {
+                find: "https?:\\/\\/(?:www\\.)?([-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6})\\b(?:[-a-zA-Z0-9()!@:%_\\+.~#?&\\/\\/=]*)",
+                replace: "$1 url"
+            }
+        ],
+        useRegex: true,
+        enableBlacklist: false,
+        blacklist: [],
+        enableWhitelist: false,
+        whitelist: [],
+    };
+
     const app = createApp({
         data() {
             return {
-                message: 'Hello Vue!'
+                config: {}
+            }
+        },
+        created() {
+            this.loadConfig();
+        },
+        watch: {
+            config: {
+                handler() {
+                    this.saveConfig();
+                },
+                deep: true
+            }
+        },
+        methods: {
+            loadConfig() {
+                this.config = {};
+                Object.assign(this.config, this.defaultConfig);
+
+                if (localStorage.getItem("iceTtsConfig")) {
+                    try {
+                        const storageConfig = JSON.parse(localStorage.getItem("iceTtsConfig"));
+                        Object.assign(this.config, storageConfig);
+
+                        console.log("Loaded iceTtsConfig from browser storage");
+                        console.log(this.config);
+                    } catch (error) {
+                        console.error("Could not read iceTtsConfig from browser storage", error);
+                    }
+                } else {
+                    console.log("No iceTtsConfig found in browser, using default");
+                }
+            },
+
+            saveConfig(newConfig) {
+                if (newConfig) {
+                    try {
+                        this.config = JSON.parse(newConfig);
+                    } catch (e) {
+                        console.error("Error while parsing new config");
+                        return false;
+                    }
+                }
+                localStorage.setItem("iceTtsConfig", JSON.stringify(this.config));
+                console.log("Saved iceTtsConfig to browser storage");
+
+                return true;
+            },
+
+            resetConfig() {
+                localStorage.setItem("iceTtsConfig", JSON.stringify(defaultConfig));
+                this.config = defaultConfig;
+                console.log("Reset iceTtsConfig");
             }
         }
     });
@@ -35,8 +118,24 @@
         'settings-section',
         {
             props: ['title'],
-            template: `<div class="bg-light p-3 m-3"><h3>{{ title }}</h3><slot></slot></div>`
+            template: `
+              <div class="bg-light p-3 m-3">
+              <h3>{{ title }}</h3>
+              <slot></slot>
+              </div>`
         });
+
+    app.component("input-text", {
+        props: ["modelValue", "id", "label", "placeholder"],
+        emits: ["update:modelValue"],
+        template: `
+          <div class="row">
+          <label for="channel" class="form-label">{{ label }}</label>
+          <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+                 type="text" class="form-control" :placeholder="placeholder" :id="id"/>
+          </div>
+        `
+    });
 
     app.mount('#app');
 </script>
