@@ -12,7 +12,8 @@ let config = {
             find: "https?:\\/\\/(?:www\\.)?([-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6})\\b(?:[-a-zA-Z0-9()!@:%_\\+.~#?&\\/\\/=]*)",
             replace: "$1 url"
         }
-    ]
+    ],
+    useWhitelist: false
 };
 
 document.querySelector("#rate").addEventListener("input", _ => updateRate(true));
@@ -24,6 +25,8 @@ document.querySelector("#read-username").addEventListener("change", updateReadUs
 document.querySelector("#username-aliases").addEventListener("input", updateUsernameAliases);
 document.querySelector("#blacklist").addEventListener("input", updateBlacklist);
 document.querySelector("#replacements").addEventListener("input", updateReplacements);
+document.querySelector("#use-whitelist").addEventListener("change", updateUseWhitelist);
+
 
 document.querySelector("#save-settings").addEventListener("click", onClickSettingsSave);
 
@@ -91,6 +94,8 @@ function loadConfig() {
 
     if (config.blacklist) document.querySelector("#blacklist").value = config.blacklist.join("\n");
     if (config.replacements) document.querySelector("#replacements").value = JSON.stringify(config.replacements, null, 2);
+
+    if (config.useWhitelist) document.querySelector("#use-whitelist").checked = config.useWhitelist;
 }
 
 function updateRate(forceChange) {
@@ -169,6 +174,11 @@ function updateReplacements() {
 
         document.querySelector("#replacements-feedback").textContent = "JSON is invalid";
     }
+}
+
+function updateUseWhitelist() {
+    config.useWhitelist = document.querySelector("#use-whitelist").checked;
+    saveConfig();
 }
 
 window.speechSynthesis.onvoiceschanged = () => {

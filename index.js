@@ -55,8 +55,17 @@ function onMessage(target, context, msg, self) {
     if (self)
         return;
 
-    if (config.blacklist && config.blacklist.includes(context.username))
-        return;
+    const listContainsName = config.blacklist && config.blacklist.includes(context.username);
+
+    if (config.useWhitelist) {
+        if (!listContainsName)
+            return;
+    } else {
+        if (listContainsName) {
+            return;
+        }
+    }
+
 
     if (config.replacements)
         config.replacements.forEach(
