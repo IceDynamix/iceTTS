@@ -14,10 +14,18 @@
     </settings-section>
 
     <settings-section title="Channel Settings">
-        <input-text v-model="config.channel" placeholder="Channel Name" label="Channel Name"></input-text>
+        <input-text v-model="config.channel" id="channel" placeholder="Channel Name" label="Channel Name"></input-text>
     </settings-section>
     <settings-section title="Speech Settings">
-
+        <input-slider-percentage
+                v-model="config.speechVolume" id="volume" placeholder="Volume" label="Volume" min="0" max="1" step="0.05"
+        ></input-slider-percentage>
+        <input-slider-percentage
+                v-model="config.speechRate" id="rate" placeholder="Rate" label="Rate" min="0" max="2" step="0.05"
+        ></input-slider-percentage>
+        <input-slider-percentage
+                v-model="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" min="0" max="2" step="0.05"
+        ></input-slider-percentage>
     </settings-section>
     <settings-section title="Language Settings"></settings-section>
     <settings-section title="Other Settings"></settings-section>
@@ -74,7 +82,7 @@
         methods: {
             loadConfig() {
                 this.config = {};
-                Object.assign(this.config, this.defaultConfig);
+                Object.assign(this.config, defaultConfig);
 
                 if (localStorage.getItem("iceTtsConfig")) {
                     try {
@@ -133,6 +141,20 @@
           <label for="channel" class="form-label">{{ label }}</label>
           <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
                  type="text" class="form-control" :placeholder="placeholder" :id="id"/>
+          </div>
+        `
+    });
+
+    app.component("input-slider-percentage", {
+        props: ["modelValue", "id", "label", "labelValue", "placeholder", "max"],
+        emits: ["update:modelValue"],
+        template: `
+          <div class="row">
+          <label for="{{id}}" class="col-2 form-label">{{ label }}</label>
+          <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+                 class="col form-range" id="{{id}}"
+                 type="range" :min="0" :max="max" step="0.05"/>
+          <span class="col-1">{{ Math.round(modelValue * 100) }}%</span>
           </div>
         `
     });
