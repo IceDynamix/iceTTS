@@ -18,14 +18,13 @@
     </settings-section>
     <settings-section title="Speech Settings">
         <input-slider-percentage
-                v-model="config.speechVolume" id="volume" placeholder="Volume" label="Volume" min="0" max="1"
-                step="0.05"
+                v-model="config.speechVolume" id="volume" placeholder="Volume" label="Volume" max="1"
         ></input-slider-percentage>
         <input-slider-percentage
-                v-model="config.speechRate" id="rate" placeholder="Rate" label="Rate" min="0" max="2" step="0.05"
+                v-model="config.speechRate" id="rate" placeholder="Rate" label="Rate" max="2"
         ></input-slider-percentage>
         <input-slider-percentage
-                v-model="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" min="0" max="2" step="0.05"
+                v-model="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" max="2"
         ></input-slider-percentage>
     </settings-section>
     <settings-section title="Language Settings">
@@ -34,6 +33,10 @@
                 label="Default Language (available languages depend on locally installed TTS languages)"
                 :items="[1,2,3,4,5]"
         ></input-select>
+        <input-checkbox
+                v-model="config.multiLangScan"
+                id="multiLangScan" label="Guess language from text content"
+        ></input-checkbox>
     </settings-section>
     <settings-section title="Other Settings"></settings-section>
 </div>
@@ -180,6 +183,20 @@
               <option v-for="item in items" :value="item" :selected="item === modelValue">{{ item }}</option>
             </select>
           </div>
+          </div>
+        `
+    });
+
+    app.component("input-checkbox", {
+        props: ["modelValue", "id", "label"],
+        emits: ["update:modelValue"],
+        template: `
+          <div class="form-check form-switch mt-3">
+          <input :checked="modelValue" @change="$emit('update:modelValue', $event.target.checked)"
+                 class="form-check-input" type="checkbox" :id="id">
+          <label class="form-check-label" :for="id">
+            {{ label }}
+          </label>
           </div>
         `
     });
