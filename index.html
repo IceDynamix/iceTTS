@@ -38,7 +38,24 @@
                 id="multiLangScan" label="Guess language from text content"
         ></input-checkbox>
     </settings-section>
-    <settings-section title="Other Settings"></settings-section>
+    <settings-section title="Other Settings">
+        <input-checkbox
+                v-model="config.readUsername"
+                id="readUsername" label="Read username before each message"
+        ></input-checkbox>
+        <input-checkbox
+                v-model="config.enableReplacements"
+                id="enableReplacements" label="Enable text replacements"
+        ></input-checkbox>
+        <input-checkbox
+                v-model="config.enableBlacklist"
+                id="enableBlacklist" label="Enable user blacklist"
+        ></input-checkbox>
+        <input-checkbox
+                v-model="config.enableWhitelist"
+                id="enableWhitelist" label="Enable user whitelist"
+        ></input-checkbox>
+    </settings-section>
 </div>
 </body>
 
