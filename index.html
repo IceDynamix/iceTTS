@@ -16,63 +16,71 @@
     <settings-section title="Channel Settings">
         <input-text v-model="config.channel" id="channel" placeholder="Channel Name" label="Channel Name"></input-text>
     </settings-section>
-    <settings-section title="Speech Settings">
-        <input-slider-percentage
-                v-model="config.speechVolume" id="volume" placeholder="Volume" label="Volume" max="1"
-        ></input-slider-percentage>
-        <input-slider-percentage
-                v-model="config.speechRate" id="rate" placeholder="Rate" label="Rate" max="2"
-        ></input-slider-percentage>
-        <input-slider-percentage
-                v-model="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" max="2"
-        ></input-slider-percentage>
-    </settings-section>
-    <settings-section title="Language Settings">
-        <input-select
-                v-model="config.defaultLang" id="defaultLang"
-                label="Default Language (available languages depend on locally installed TTS languages)"
-                :items="[1,2,3,4,5]"
-        ></input-select>
-        <input-checkbox
-                v-model="config.multiLangScan"
-                id="multiLangScan" label="Guess language from text content"
-        ></input-checkbox>
-    </settings-section>
-    <settings-section title="Other Settings">
-        <input-checkbox
-                v-model="config.readUsername"
-                id="readUsername" label="Read username before each message"
-        ></input-checkbox>
-        <input-checkbox
-                v-model="config.enableReplacements"
-                id="enableReplacements" label="Enable text replacements"
-        ></input-checkbox>
-        <input-checkbox
-                v-model="config.enableBlacklist"
-                id="enableBlacklist" label="Enable user blacklist"
-        ></input-checkbox>
-        <input-checkbox
-                v-model="config.enableWhitelist"
-                id="enableWhitelist" label="Enable user whitelist"
-        ></input-checkbox>
-    </settings-section>
 
-    <settings-section title="Test Modal">
-        <modal id="test-modal" title="Test Modal" trigger-label="Open test modal">
-            <template v-slot:body>
-                <p>ababa</p>
-            </template>
-            <template v-slot:footer>
-                <button type="button" class="btn btn-primary">
-                    ababa
-                </button>
-            </template>
-        </modal>
+    <div class="row">
+        <div class="col">
+            <settings-section title="Speech Settings">
+                <input-slider-percentage
+                        v-model.number="config.speechVolume" id="volume" placeholder="Volume" label="Volume" max="1"
+                ></input-slider-percentage>
+                <input-slider-percentage
+                        v-model.number="config.speechRate" id="rate" placeholder="Rate" label="Rate" max="2"
+                ></input-slider-percentage>
+                <input-slider-percentage
+                        v-model.number="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" max="2"
+                ></input-slider-percentage>
+            </settings-section>
+        </div>
+        <div class="col">
+            <settings-section title="Language Settings">
+                <input-select
+                        v-model="config.defaultLang" id="defaultLang"
+                        label="Default Language (available languages depend on locally installed TTS languages)"
+                        :items="[1,2,3,4,5]"
+                ></input-select>
+                <input-checkbox
+                        v-model="config.multiLangScan"
+                        id="multiLangScan" label="Guess language from text content"
+                ></input-checkbox>
+            </settings-section>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col">
+            <settings-section title="Other Settings">
+                <input-checkbox
+                        v-model="config.readUsername"
+                        id="readUsername" label="Read username before each message"
+                ></input-checkbox>
+                <input-checkbox
+                        v-model="config.enableReplacements"
+                        id="enableReplacements" label="Enable text replacements"
+                ></input-checkbox>
+                <input-checkbox
+                        v-model="config.enableBlacklist"
+                        id="enableBlacklist" label="Enable user blacklist"
+                ></input-checkbox>
+                <input-checkbox
+                        v-model="config.enableWhitelist"
+                        id="enableWhitelist" label="Enable user whitelist"
+                ></input-checkbox>
+            </settings-section>
+        </div>
+    </div>
+
+
+    <settings-section title="Edit Settings JSON">
+        <p>
+            You can import/export settings from here
+            <small class="text-muted">
+                (or set stupid values. Ever listened to 10x speed voice?)
+            </small>
+        </p>
+        <settings-json></settings-json>
     </settings-section>
-    
-    <toast id="test-toast">
-        <p>ababa</p>
-    </toast>
 </div>
 </body>
 

@@ -1,4 +1,4 @@
-const {createApp} = Vue;
+const {createApp, reactive} = Vue;
 
 const defaultConfig = {
     channel: "",
@@ -27,6 +27,8 @@ const defaultConfig = {
     whitelist: [],
 };
 
+const localStorageKey = "iceTtsConfig";
+
 const app = createApp({
     data() {
         return {
@@ -49,9 +51,9 @@ const app = createApp({
             this.config = {};
             Object.assign(this.config, defaultConfig);
 
-            if (localStorage.getItem("iceTtsConfig")) {
+            if (localStorage.getItem(localStorageKey)) {
                 try {
-                    const storageConfig = JSON.parse(localStorage.getItem("iceTtsConfig"));
+                    const storageConfig = JSON.parse(localStorage.getItem(localStorageKey));
                     Object.assign(this.config, storageConfig);
 
                     console.log("Loaded iceTtsConfig from browser storage");
@@ -73,14 +75,14 @@ const app = createApp({
                     return false;
                 }
             }
-            localStorage.setItem("iceTtsConfig", JSON.stringify(this.config));
+            localStorage.setItem(localStorageKey, JSON.stringify(this.config));
             console.log("Saved iceTtsConfig to browser storage");
 
             return true;
         },
 
         resetConfig() {
-            localStorage.setItem("iceTtsConfig", JSON.stringify(defaultConfig));
+            localStorage.setItem(localStorageKey, JSON.stringify(defaultConfig));
             this.config = defaultConfig;
             console.log("Reset iceTtsConfig");
         }
@@ -92,7 +94,7 @@ app.component(
     {
         props: ['title'],
         template: `
-          <div class="bg-light p-3 m-3">
+          <div class="bg-light p-3 my-3">
           <h3>{{ title }}</h3>
           <slot></slot>
           </div>`
@@ -119,7 +121,7 @@ app.component("input-slider-percentage", {
       <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
              class="col form-range" :id="id"
              type="range" :min="0" :max="max" step="0.05"/>
-      <span class="col-1">{{ Math.round(modelValue * 100) }}%</span>
+      <span class="col-2">{{ Math.round(modelValue * 100) }}%</span>
       </div>
     `
 });
@@ -156,18 +158,28 @@ app.component("input-checkbox", {
     `
 });
 
-app.component('modal', {
-    props: ['id', 'title', 'triggerLabel'],
+app.component("app-button", {
+    props: ['label'],
     template: `
-      <button type="button" class="btn btn-primary btn-sm"
-              data-bs-toggle="modal" :data-bs-target="'#' + id">
-      {{ triggerLabel }}
-      </button>
-      <div class="modal fade" :id="id" tabindex="-1" aria-labelledby="{{id}}Label" aria-hidden="true">
+      <button type="button" class="btn btn-primary">{{ label }}</button>
+    `
+})
+
+app.component("modal-trigger", {
+    props: ['label', 'modalId'],
+    template: `
+      <app-button :label="label" data-bs-toggle="modal" :data-bs-target="'#' + modalId"></app-button>
+    `
+})
+
+app.component('modal', {
+    props: ['id', 'title'],
+    template: `
+      <div class="modal fade" :id="id" tabindex="-1" :aria-labelledby="id+'Label'" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="{{id}}Label">{{ title }}</h5>
+            <h5 class="modal-title" id="id+'Label'">{{ title }}</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
@@ -206,6 +218,46 @@ app.component("toast", {
         },
         dispose() {
             this.instance.dispose();
+        }
+    }
+});
+
+app.component("settings-json", {
+    data() {
+        return {
+            id: "settings-modal",
+            settingsText: '',
+            saveResult: null,
+        }
+    },
+    template: `
+      <modal-trigger :modalId="id" label="Open settings JSON" @click="load()"></modal-trigger>
+      <modal :id="id" title="Settings JSON">
+      <template v-slot:body>
+        <p>
+          Make sure to make a backup when editing directly! Only the JSON format is validated, the
+          values are unchecked.
+        </p>
+        <textarea
+            class="form-control" :class="{'is-valid': saveResult === true, 'is-invalid': saveResult === false}"
+            rows="10" style="font-family:monospace;white-space:pre;overflow-wrap:normal;overflow-x:scroll;"
+            v-model="settingsText"
+            @input="saveResult = null"
+        ></textarea>
+      </template>
+      <template v-slot:footer>
+        <button type="button" class="btn btn-primary" @click="save()">
+          Save
+        </button>
+      </template>
+      </modal>
+    `,
+    methods: {
+        load() {
+            this.settingsText = JSON.stringify(this.$root.config, null, 2);
+        },
+        save() {
+            this.saveResult = this.$root.saveConfig(this.settingsText);
         }
     }
 });
