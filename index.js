@@ -183,4 +183,31 @@ app.component('modal', {
     `
 });
 
+app.component("toast", {
+    props: ["id"],
+    template: `
+      <div class="toast-container position-fixed bottom-0 end-0 m-3">
+      <div :id="id" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body">
+          <slot></slot>
+        </div>
+      </div>
+      </div>
+    `,
+    get instance() {
+        return bootstrap.Toast.getOrCreateInstance(document.getElementById(this.id));
+    },
+    methods: {
+        show() {
+            this.instance.show();
+        },
+        hide() {
+            this.instance.hide();
+        },
+        dispose() {
+            this.instance.dispose();
+        }
+    }
+});
+
 app.mount('#app');
