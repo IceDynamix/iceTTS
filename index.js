@@ -157,8 +157,12 @@ app.component("input-checkbox", {
 });
 
 app.component('modal', {
-    props: ['id', 'title'],
+    props: ['id', 'title', 'triggerLabel'],
     template: `
+      <button type="button" class="btn btn-primary btn-sm"
+              data-bs-toggle="modal" :data-bs-target="'#' + id">
+      {{ triggerLabel }}
+      </button>
       <div class="modal fade" :id="id" tabindex="-1" aria-labelledby="{{id}}Label" aria-hidden="true">
       <div class="modal-dialog">
         <div class="modal-content">
