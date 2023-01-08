@@ -63,7 +63,14 @@
             Open test modal
         </button>
         <modal id="test-modal" title="Test Modal">
-            <p>ababa</p>
+            <template v-slot:body>
+                <p>ababa</p>
+            </template>
+            <template v-slot:footer>
+                <button type="button" class="btn btn-primary">
+                    ababa
+                </button>
+            </template>
         </modal>
     </settings-section>
 </div>
