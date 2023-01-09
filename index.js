@@ -203,9 +203,11 @@ const app = createApp({
         },
 
         resetConfig() {
-            localStorage.setItem(localStorageKey, JSON.stringify(defaultConfig));
-            this.config = defaultConfig;
-            console.log("Reset iceTtsConfig");
+            if (confirm("Are you sure you want to reset all settings?")) {
+                localStorage.setItem(localStorageKey, JSON.stringify(defaultConfig));
+                this.config = defaultConfig;
+                console.log("Reset iceTtsConfig");
+            }
         },
 
         tts(text) {

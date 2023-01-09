@@ -197,9 +197,17 @@
                         (or set stupid values. Ever listened to 10x speed voice?)
                     </small>
                 </p>
-                <settings-json></settings-json>
-            </settings-section>
 
+                <div class="row">
+                    <div class="col-auto">
+                        <settings-json></settings-json>
+                    </div>
+                    <div class="col-auto">
+                        <app-button class="btn-danger ml-3" label="Reset all settings"
+                                    @click="resetConfig"></app-button>
+                    </div>
+                </div>
+            </settings-section>
         </div>
     </div>
 
