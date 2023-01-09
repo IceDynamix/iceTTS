@@ -332,9 +332,12 @@ const app = createApp({
             for (const name of [displayName, twitchName]) {
                 if (this.config.enableBlacklist && this.config.blacklist.includes(name))
                     return false;
+            }
 
-                if (this.config.enableWhitelist && !this.config.whitelist.includes(name))
+            if (this.config.enableWhitelist) {
+                if (!(this.config.whitelist.contains(displayName) || this.config.whitelist.contains(twitchName))) {
                     return false;
+                }
             }
 
             return true;
