@@ -12,12 +12,24 @@ const defaultConfig = {
     enableReplacements: false,
     replacements: [
         {
-            find: "asshole",
-            replace: "a-hole"
-        },
-        {
             find: "https?:\\/\\/(?:www\\.)?([-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6})\\b(?:[-a-zA-Z0-9()!@:%_\\+.~#?&\\/\\/=]*)",
             replace: "$1 url"
+        },
+        {
+            find: "(asshole|fuck|smooth ?brained)",
+            replace: " slur "
+        },
+        {
+            find: "[:\\/;]",
+            replace: " "
+        },
+        {
+            find: "(.)\\1{4,}",
+            replace: "$1$1$1$1$1"
+        },
+        {
+            find: "^(.{150}).*$",
+            replace: "$1 et cetera"
         }
     ],
     useRegex: true,
@@ -377,7 +389,7 @@ app.component('modal', {
     props: ['id', 'title'],
     template: `
       <div class="modal fade" :id="id" tabindex="-1" :aria-labelledby="id+'Label'" aria-hidden="true">
-      <div class="modal-dialog">
+      <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="id+'Label'">{{ title }}</h5>

@@ -42,6 +42,44 @@
                         id="enableReplacements" label="Enable text replacements"
                 ></input-checkbox>
 
+                <modal-trigger v-if="config.enableReplacements" modal-id="replacementsModal" class="btn-sm"
+                               label="Options"></modal-trigger>
+                <modal id="replacementsModal" title="Text Replacements">
+                    <template v-slot:body>
+                        <p>
+                            Use this to automatically replace text in messages.
+                            <a href="https://en.wikipedia.org/wiki/Regular_expression">Regular expressions</a>
+                            allow for way more ways of using this feature than you think! The default examples include
+                        </p>
+                        <ul>
+                            <li>Censoring specific bad words</li>
+                            <li>Shortening URL readings</li>
+                            <li>Skipping some special characters</li>
+                            <li>Skipping more than 5 repeated characters</li>
+                            <li>Limiting messages to 150 characters</li>
+                        </ul>
+                        <p>Some other applications include fixing mispronounced words or expanding abbreviations</p>
+                        <list-table :list="config.replacements" :default="{find: '', replace: ''}">
+                            <template v-slot:header>
+                                <th>Find</th>
+                                <th>Replace</th>
+                            </template>
+                            <template v-slot:item="{item, index}">
+                                <td>
+                                    <input-text v-model="item.find" placeholder="Find"></input-text>
+                                </td>
+                                <td>
+                                    <input-text v-model="item.replace" placeholder="Replace"></input-text>
+                                </td>
+                            </template>
+                        </list-table>
+                        <input-checkbox
+                                v-model="config.useRegex"
+                                id="useRegex" label="Use Regular Expressions"
+                        ></input-checkbox>
+                    </template>
+                </modal>
+
                 <input-checkbox
                         v-model="config.enableBlacklist"
                         id="enableBlacklist" label="Enable user blacklist"
@@ -136,7 +174,7 @@
                 </p>
                 <settings-json></settings-json>
             </settings-section>
-            
+
         </div>
     </div>
 
