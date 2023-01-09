@@ -133,7 +133,9 @@ const app = createApp({
     data() {
         return {
             config: {},
-            availableLanguages: []
+            availableLanguages: [],
+            ircClient: null,
+            ircConnected: false
         }
     },
     created() {
@@ -212,7 +214,39 @@ const app = createApp({
             }
 
             speak(defaultLang);
-        }
+        },
+
+        connectIrc() {
+            if (this.ircClient)
+                return; // Already connected
+
+            this.ircClient = new tmi.client({channels: [this.config.channel]});
+
+            this.ircClient.on("connected", (x) => {
+                console.log(x);
+                this.ircConnected = true;
+            });
+
+            this.ircClient.on("disconnected", (x) => {
+                console.log(x);
+                this.ircConnected = false;
+            });
+
+            this.ircClient.on("chat", console.log);
+
+            this.ircClient.connect().catch(console.error);
+        },
+
+        disconnectIrc() {
+            if (!this.ircClient) return;
+            this.ircClient.disconnect().then(() => {
+                this.ircClient = null;
+            }).catch(console.error);
+        },
+
+        isIrcConnected() {
+            return this.ircClient != null;
+        },
     }
 });
 
@@ -231,11 +265,9 @@ app.component("input-text", {
     props: ["modelValue", "id", "label", "placeholder"],
     emits: ["update:modelValue"],
     template: `
-      <div class="row">
-      <label for="channel" class="form-label">{{ label }}</label>
-      <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
-             type="text" class="form-control" :placeholder="placeholder" :id="id"/>
-      </div>
+        <label for="channel" class="form-label">{{ label }}</label>
+        <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+               type="text" class="form-control" :placeholder="placeholder" :id="id"/>
     `
 });
 
