@@ -69,18 +69,63 @@
                         v-model="config.readUsername"
                         id="readUsername" label="Read username before each message"
                 ></input-checkbox>
+
                 <input-checkbox
                         v-model="config.enableReplacements"
                         id="enableReplacements" label="Enable text replacements"
                 ></input-checkbox>
+
                 <input-checkbox
                         v-model="config.enableBlacklist"
                         id="enableBlacklist" label="Enable user blacklist"
                 ></input-checkbox>
+
+                <modal-trigger v-if="config.enableBlacklist" modal-id="blacklistModal" class="btn-sm"
+                               label="Options"></modal-trigger>
+                <modal id="blacklistModal" title="User Blacklist">
+                    <template v-slot:body>
+                        <p>
+                            Someone's been naughty? Or maybe you don't want to read out bots? Put their name in here!
+                            Messages from users in this list will not be read out.
+                        </p>
+                        <list-table :list="config.blacklist" :default="''">
+                            <template v-slot:header>
+                                <th>Username</th>
+                            </template>
+                            <template v-slot:item="{item, index}">
+                                <td>
+                                    <input-text v-model="item" placeholder="Username"></input-text>
+                                </td>
+                            </template>
+                        </list-table>
+                    </template>
+                </modal>
+
                 <input-checkbox
                         v-model="config.enableWhitelist"
                         id="enableWhitelist" label="Enable user whitelist"
                 ></input-checkbox>
+
+                <modal-trigger v-if="config.enableWhitelist" modal-id="whitelistModal" class="btn-sm"
+                               label="Options"></modal-trigger>
+                <modal id="whitelistModal" title="User Whitelist">
+                    <template v-slot:body>
+                        <p>
+                            What about the other way around? Maybe you only want to allow messages from specific
+                            people? If enabled, then <i>only</i> messages from users in this list will be read out.
+                        </p>
+                        <list-table :list="config.whitelist" :default="''">
+                            <template v-slot:header>
+                                <th>Username</th>
+                            </template>
+                            <template v-slot:item="{item, index}">
+                                <td>
+                                    <input-text v-model="item" placeholder="Username"></input-text>
+                                </td>
+                            </template>
+                        </list-table>
+                    </template>
+                </modal>
             </settings-section>
         </div>
     </div>

@@ -307,7 +307,7 @@ app.component("input-text", {
     props: ["modelValue", "id", "label", "placeholder"],
     emits: ["update:modelValue"],
     template: `
-      <label for="channel" class="form-label">{{ label }}</label>
+      <label v-if="label" for="channel" class="form-label">{{ label }}</label>
       <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
              type="text" class="form-control" :placeholder="placeholder" :id="id"/>
     `
@@ -445,6 +445,47 @@ app.component("settings-json", {
         },
         save() {
             this.saveResult = this.$root.saveConfig(this.settingsText);
+        }
+    }
+});
+
+app.component('list-table', {
+    props: ['list', 'default'],
+    data() {
+        return {
+            items: this.list,
+            newItem: this.default
+        }
+    },
+    template: `
+      <table class="table">
+      <thead>
+      <tr>
+        <slot name="header"></slot>
+        <th></th>
+      </tr>
+      </thead>
+      <tbody>
+      <template v-for="(item, i) in items" :key="i">
+        <tr>
+          <slot name="item" :item="item" :index="i"></slot>
+          <td>
+            <button @click="remove(i)" class="btn btn-danger">-</button>
+          </td>
+        </tr>
+      </template>
+      </tbody>
+      </table>
+      <p>
+      <button @click="add()" class="btn btn-success">Add</button>
+      </p>
+    `,
+    methods: {
+        add() {
+            this.items.push(this.newItem);
+        },
+        remove(i) {
+            this.items.splice(i, 1);
         }
     }
 });
