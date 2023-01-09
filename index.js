@@ -1,6 +1,7 @@
 const {createApp, reactive} = Vue;
 
 const defaultConfig = {
+    version: 2,
     channel: "",
     speechRate: 1.0,
     speechVolume: 0.5,
@@ -141,6 +142,33 @@ const langNameMap = {
     "zu": "Zulu"
 };
 
+const configMigrations = [
+    {
+        version: 1,
+        migration: config => config.enableReplacements = config.replacements.length > 0
+    },
+    {
+        version: 2,
+        migration: config => config.usernameAliases = Object.entries(config.usernameAliases)
+            .map(([username, alias]) => ({username, alias}))
+    }
+];
+
+function performConfigMigrations(config) {
+    if (!("version" in config)) {
+        config.version = 0;
+    }
+
+    for (const {version, migration} of configMigrations) {
+        if (version <= config.version) continue;
+        migration(config);
+        console.log(`Migrated config from version ${config.version} to ${version}`)
+        config.version++;
+    }
+
+    return config;
+}
+
 const app = createApp({
     data() {
         return {
@@ -174,7 +202,8 @@ const app = createApp({
 
             if (localStorage.getItem(localStorageKey)) {
                 try {
-                    const storageConfig = JSON.parse(localStorage.getItem(localStorageKey));
+                    let storageConfig = JSON.parse(localStorage.getItem(localStorageKey));
+                    storageConfig = performConfigMigrations(storageConfig);
                     Object.assign(this.config, storageConfig);
 
                     console.log("Loaded iceTtsConfig from browser storage");
