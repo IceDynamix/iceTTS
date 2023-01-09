@@ -223,12 +223,14 @@ const app = createApp({
             this.ircClient = new tmi.client({channels: [this.config.channel]});
 
             this.ircClient.on("connected", (x) => {
-                console.log(x);
+                console.log(`Connected to IRC: ${x}`);
+                new bootstrap.Toast(document.getElementById("toast-connected")).show();
                 this.ircConnected = true;
             });
 
             this.ircClient.on("disconnected", (x) => {
-                console.log(x);
+                console.log(`Disconnected from IRC: ${x}`);
+                new bootstrap.Toast(document.getElementById("toast-disconnected")).show();
                 this.ircConnected = false;
             });
 
@@ -365,20 +367,6 @@ app.component("toast", {
       </div>
       </div>
     `,
-    get instance() {
-        return bootstrap.Toast.getOrCreateInstance(document.getElementById(this.id));
-    },
-    methods: {
-        show() {
-            this.instance.show();
-        },
-        hide() {
-            this.instance.hide();
-        },
-        dispose() {
-            this.instance.dispose();
-        }
-    }
 });
 
 app.component("settings-json", {
