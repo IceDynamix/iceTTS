@@ -37,6 +37,31 @@
                         id="readUsername" label="Read username before each message"
                 ></input-checkbox>
 
+                <modal-trigger v-if="config.readUsername" modal-id="aliasesModal" class="btn-sm"
+                               label="Options"></modal-trigger>
+                <modal id="aliasesModal" title="Username Aliases">
+                    <template v-slot:body>
+                        <p>
+                            Read someone's username as something else. Maybe their name is too long, hard to
+                            pronounce or maybe mispronounced?
+                        </p>
+                        <list-table :list="config.usernameAliases" :default="{username: '', alias: ''}">
+                            <template v-slot:header>
+                                <th>Username</th>
+                                <th>Alias</th>
+                            </template>
+                            <template v-slot:item="{item, index}">
+                                <td>
+                                    <input-text v-model="item.username" placeholder="Find"></input-text>
+                                </td>
+                                <td>
+                                    <input-text v-model="item.alias" placeholder="Replace"></input-text>
+                                </td>
+                            </template>
+                        </list-table>
+                    </template>
+                </modal>
+
                 <input-checkbox
                         v-model="config.enableReplacements"
                         id="enableReplacements" label="Enable text replacements"

@@ -291,15 +291,15 @@ const app = createApp({
 
         getUsernameReading(context) {
             const aliases = this.config.usernameAliases;
-            let username = context["display-name"];
 
-            if (context["username"] in aliases) {
-                username = context["username"];
-            } else if (context["display-name"] in aliases) {
-                username = aliases[context["display-name"]];
+            const displayName = context["display-name"];
+            const twitchName = context["username"];
+
+            for ({username, alias} of aliases) {
+                if ([displayName, twitchName].includes(username)) return alias;
             }
 
-            return username;
+            return displayName;
         }
     }
 });
