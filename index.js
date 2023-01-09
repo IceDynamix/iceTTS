@@ -130,127 +130,165 @@ const langNameMap = {
 };
 
 const app = createApp({
-    data() {
-        return {
-            config: {},
-            availableLanguages: [],
-            ircClient: null,
-            ircConnected: false
-        }
-    },
-    created() {
-        this.loadConfig();
+        data() {
+            return {
+                config: {},
+                availableLanguages: [],
+                ircClient: null,
+                ircConnected: false
+            }
+        },
+        created() {
+            this.loadConfig();
 
-        window.speechSynthesis.onvoiceschanged = () => {
-            this.availableLanguages = window.speechSynthesis.getVoices()
-                .map(v => langNameMap[v.lang.slice(0, 2)]) // get full name
-                .filter((v, i, self) => self.indexOf(v) === i); // unique
-        };
-    },
-    watch: {
-        config: {
-            handler() {
-                this.saveConfig();
+            window.speechSynthesis.onvoiceschanged = () => {
+                this.availableLanguages = window.speechSynthesis.getVoices()
+                    .map(v => langNameMap[v.lang.slice(0, 2)]) // get full name
+                    .filter((v, i, self) => self.indexOf(v) === i); // unique
+            };
+        },
+        watch: {
+            config: {
+                handler() {
+                    this.saveConfig();
+                },
+                deep: true
+            }
+        },
+        methods: {
+            loadConfig() {
+                this.config = {};
+                Object.assign(this.config, defaultConfig);
+
+                if (localStorage.getItem(localStorageKey)) {
+                    try {
+                        const storageConfig = JSON.parse(localStorage.getItem(localStorageKey));
+                        Object.assign(this.config, storageConfig);
+
+                        console.log("Loaded iceTtsConfig from browser storage");
+                        console.log(this.config);
+                    } catch (error) {
+                        console.error("Could not read iceTtsConfig from browser storage", error);
+                    }
+                } else {
+                    console.log("No iceTtsConfig found in browser, using default");
+                }
             },
-            deep: true
+
+            saveConfig(newConfig) {
+                if (newConfig) {
+                    try {
+                        this.config = JSON.parse(newConfig);
+                    } catch (e) {
+                        console.error("Error while parsing new config");
+                        return false;
+                    }
+                }
+                localStorage.setItem(localStorageKey, JSON.stringify(this.config));
+                console.log("Saved iceTtsConfig to browser storage");
+
+                return true;
+            },
+
+            resetConfig() {
+                localStorage.setItem(localStorageKey, JSON.stringify(defaultConfig));
+                this.config = defaultConfig;
+                console.log("Reset iceTtsConfig");
+            },
+
+            tts(text) {
+                const speech = new SpeechSynthesisUtterance(text);
+
+                speech.rate = this.config.speechRate;
+                speech.pitch = this.config.speechPitch;
+                speech.volume = this.config.speechVolume;
+
+                const defaultLang = this.config.defaultLang;
+
+                function speak(lang) {
+                    if (lang === "unknown") console.log(`Could not detect language for ${text}`);
+                    speech.lang = lang === "unknown" ? defaultLang : lang;
+                    speech.voice = window.speechSynthesis.getVoices().filter(v => v.lang === speech.lang)[0];
+                    window.speechSynthesis.speak(speech);
+                    console.log(`Spoke message '${text}' in ' ${lang}'`);
+                }
+
+                speak(defaultLang);
+            },
+
+            connectIrc() {
+                if (this.ircClient)
+                    return; // Already connected
+
+                this.ircClient = new tmi.client({channels: [this.config.channel]});
+
+                this.ircClient.on("connected", (x) => {
+                    console.log(`Connected to IRC: ${x}`);
+                    new bootstrap.Toast(document.getElementById("toast-connected")).show();
+                    this.ircConnected = true;
+                });
+
+                this.ircClient.on("disconnected", (x) => {
+                    console.log(`Disconnected from IRC: ${x}`);
+                    new bootstrap.Toast(document.getElementById("toast-disconnected")).show();
+                    this.ircConnected = false;
+                });
+
+                this.ircClient.on("chat", (target, context, msg, self) => {
+                    if (self) return;
+
+                    msg = this.performReplacements(msg);
+                    if (this.config.readUsername) {
+                        let username = this.getUsernameReading(context);
+                        msg = username + ": " + msg;
+                    }
+
+                    this.tts(msg);
+                });
+
+                this.ircClient.connect().catch(console.error);
+            },
+
+            disconnectIrc() {
+                if (!this.ircClient) return;
+                this.ircClient.disconnect().then(() => {
+                    this.ircClient = null;
+                }).catch(console.error);
+            },
+
+            isIrcConnected() {
+                return this.ircClient != null;
+            },
+
+            performReplacements(msg) {
+                if (!this.config.enableReplacements) return msg;
+
+                for (const {find, replace} of this.config.replacements) {
+                    if (this.config.useRegex) {
+                        msg = msg.replace(new RegExp(find, "g"), replace)
+                    } else {
+                        msg = msg.replaceAll(find, replace);
+                    }
+                }
+
+                return msg;
+            },
+
+            getUsernameReading(context) {
+                const aliases = this.config.usernameAliases;
+                let username = context["display-name"];
+
+                if (context["username"] in aliases) {
+                    username = context["username"];
+                } else if (context["display-name"] in aliases) {
+                    username = aliases[context["display-name"]];
+                }
+
+                return username;
+            }
         }
-    },
-    methods: {
-        loadConfig() {
-            this.config = {};
-            Object.assign(this.config, defaultConfig);
-
-            if (localStorage.getItem(localStorageKey)) {
-                try {
-                    const storageConfig = JSON.parse(localStorage.getItem(localStorageKey));
-                    Object.assign(this.config, storageConfig);
-
-                    console.log("Loaded iceTtsConfig from browser storage");
-                    console.log(this.config);
-                } catch (error) {
-                    console.error("Could not read iceTtsConfig from browser storage", error);
-                }
-            } else {
-                console.log("No iceTtsConfig found in browser, using default");
-            }
-        },
-
-        saveConfig(newConfig) {
-            if (newConfig) {
-                try {
-                    this.config = JSON.parse(newConfig);
-                } catch (e) {
-                    console.error("Error while parsing new config");
-                    return false;
-                }
-            }
-            localStorage.setItem(localStorageKey, JSON.stringify(this.config));
-            console.log("Saved iceTtsConfig to browser storage");
-
-            return true;
-        },
-
-        resetConfig() {
-            localStorage.setItem(localStorageKey, JSON.stringify(defaultConfig));
-            this.config = defaultConfig;
-            console.log("Reset iceTtsConfig");
-        },
-
-        tts(text) {
-            const speech = new SpeechSynthesisUtterance(text);
-
-            speech.rate = this.config.speechRate;
-            speech.pitch = this.config.speechPitch;
-            speech.volume = this.config.speechVolume;
-
-            const defaultLang = this.config.defaultLang;
-
-            function speak(lang) {
-                if (lang === "unknown") console.log(`Could not detect language for ${text}`);
-                speech.lang = lang === "unknown" ? defaultLang : lang;
-                speech.voice = window.speechSynthesis.getVoices().filter(v => v.lang === speech.lang)[0];
-                window.speechSynthesis.speak(speech);
-                console.log(`Spoke message '${text}' in ' ${lang}'`);
-            }
-
-            speak(defaultLang);
-        },
-
-        connectIrc() {
-            if (this.ircClient)
-                return; // Already connected
-
-            this.ircClient = new tmi.client({channels: [this.config.channel]});
-
-            this.ircClient.on("connected", (x) => {
-                console.log(`Connected to IRC: ${x}`);
-                new bootstrap.Toast(document.getElementById("toast-connected")).show();
-                this.ircConnected = true;
-            });
-
-            this.ircClient.on("disconnected", (x) => {
-                console.log(`Disconnected from IRC: ${x}`);
-                new bootstrap.Toast(document.getElementById("toast-disconnected")).show();
-                this.ircConnected = false;
-            });
-
-            this.ircClient.on("chat", console.log);
-
-            this.ircClient.connect().catch(console.error);
-        },
-
-        disconnectIrc() {
-            if (!this.ircClient) return;
-            this.ircClient.disconnect().then(() => {
-                this.ircClient = null;
-            }).catch(console.error);
-        },
-
-        isIrcConnected() {
-            return this.ircClient != null;
-        },
-    }
-});
+    })
+;
 
 app.component(
     'settings-section',
@@ -267,9 +305,9 @@ app.component("input-text", {
     props: ["modelValue", "id", "label", "placeholder"],
     emits: ["update:modelValue"],
     template: `
-        <label for="channel" class="form-label">{{ label }}</label>
-        <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
-               type="text" class="form-control" :placeholder="placeholder" :id="id"/>
+      <label for="channel" class="form-label">{{ label }}</label>
+      <input :value="modelValue" @input="$emit('update:modelValue', $event.target.value)"
+             type="text" class="form-control" :placeholder="placeholder" :id="id"/>
     `
 });
 
