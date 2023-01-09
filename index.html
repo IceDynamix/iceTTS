@@ -215,13 +215,24 @@
         <small><a href="https://github.com/IceDynamix/iceTTS" class="text-muted">Source Code</a></small>
     </div>
 
-    <toast id="toast-connected">
-        Connected to Twitch
-    </toast>
+    <div class="toast-container position-fixed bottom-0 end-0 m-3">
+        <toast id="toast-connected" class="border border-success">
+            Connected to Twitch
+        </toast>
 
-    <toast id="toast-disconnected">
-        Disconnected from Twitch
-    </toast>
+        <toast id="toast-connected-error" class="border border-success">
+            Failed to connect to Twitch, please see error
+        </toast>
+
+        <toast id="toast-disconnected" class="border border-danger">
+            Disconnected from Twitch
+        </toast>
+
+        <toast id="toast-bad-config" class="bg-danger text-white">
+            There was an error parsing the config stored in storage, please check the console!
+        </toast>
+    </div>
+
 </div>
 </body>
 

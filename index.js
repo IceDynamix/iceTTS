@@ -1,4 +1,4 @@
-const {createApp, reactive} = Vue;
+const {createApp} = Vue;
 
 const defaultConfig = {
     version: 2,
@@ -175,7 +175,8 @@ const app = createApp({
             config: {},
             availableLanguages: [],
             ircClient: null,
-            ircConnected: false
+            ircConnected: false,
+            showConfigToast: false
         }
     },
     created() {
@@ -187,6 +188,12 @@ const app = createApp({
                 .filter((v, i, self) => self.indexOf(v) === i); // unique
         };
     },
+    mounted() {
+        if (this.showConfigToast) {
+            new bootstrap.Toast(document.getElementById("toast-bad-config")).show();
+            this.showConfigToast = false;
+        }
+    },
     watch: {
         config: {
             handler() {
@@ -197,23 +204,30 @@ const app = createApp({
     },
     methods: {
         loadConfig() {
-            this.config = {};
-            Object.assign(this.config, defaultConfig);
+            // this.config is saved on every assignment (see watcher),
+            // we want to avoid making any assignments until its actually ready
+            let tempConfig = {...defaultConfig};
 
-            if (localStorage.getItem(localStorageKey)) {
+            let storageConfigString = localStorage.getItem(localStorageKey);
+            if (storageConfigString) {
                 try {
-                    let storageConfig = JSON.parse(localStorage.getItem(localStorageKey));
+                    let storageConfig = JSON.parse(storageConfigString);
                     storageConfig = performConfigMigrations(storageConfig);
-                    Object.assign(this.config, storageConfig);
+                    tempConfig = {...tempConfig, ...storageConfig};
 
                     console.log("Loaded iceTtsConfig from browser storage");
-                    console.log(this.config);
+                    console.log(tempConfig);
                 } catch (error) {
-                    console.error("Could not read iceTtsConfig from browser storage", error);
+                    console.error("Could not read iceTtsConfig from browser storage");
+                    console.log("Original string stored in storage: ", storageConfigString);
+                    console.error(error);
+                    this.showConfigToast = true;
                 }
             } else {
                 console.log("No iceTtsConfig found in browser, using default");
             }
+
+            this.config = tempConfig;
         },
 
         saveConfig(newConfig) {
@@ -222,6 +236,7 @@ const app = createApp({
                     this.config = JSON.parse(newConfig);
                 } catch (e) {
                     console.error("Error while parsing new config");
+                    console.error(e);
                     return false;
                 }
             }
@@ -268,12 +283,6 @@ const app = createApp({
 
             this.ircClient = new tmi.client({channels: [this.config.channel]});
 
-            this.ircClient.on("connected", (x) => {
-                console.log(`Connected to IRC: ${x}`);
-                new bootstrap.Toast(document.getElementById("toast-connected")).show();
-                this.ircConnected = true;
-            });
-
             this.ircClient.on("disconnected", (x) => {
                 console.log(`Disconnected from IRC: ${x}`);
                 new bootstrap.Toast(document.getElementById("toast-disconnected")).show();
@@ -292,7 +301,15 @@ const app = createApp({
                 this.tts(msg);
             });
 
-            this.ircClient.connect().catch(console.error);
+            this.ircClient.connect().then(x => {
+                console.log(`Connected to IRC: ${x}`);
+                new bootstrap.Toast(document.getElementById("toast-connected")).show();
+                this.ircConnected = true;
+            }).catch(err => {
+                console.error("Could not connect to Twitch");
+                console.error(err);
+                new bootstrap.Toast(document.getElementById("toast-connected-error")).show();
+            });
         },
 
         disconnectIrc() {
@@ -442,11 +459,9 @@ app.component('modal', {
 app.component("toast", {
     props: ["id"],
     template: `
-      <div class="toast-container position-fixed bottom-0 end-0 m-3">
       <div :id="id" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-body">
-          <slot></slot>
-        </div>
+      <div class="toast-body">
+        <slot></slot>
       </div>
       </div>
     `,
