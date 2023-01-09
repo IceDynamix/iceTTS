@@ -297,7 +297,7 @@ app.component(
     {
         props: ['title'],
         template: `
-          <div class="bg-light p-3 my-3">
+          <div class="bg-light p-4 my-4">
           <h3>{{ title }}</h3>
           <slot></slot>
           </div>`

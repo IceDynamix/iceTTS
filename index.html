@@ -12,42 +12,13 @@
 
 <body class="container bg-dark">
 <div id="app">
-    <settings-section>
-        <h1>iceTTS - Twitch Chat TTS</h1>
-    </settings-section>
-
-    <settings-section title="Channel Settings">
-        <div class="row">
-            <div class="col">
-                <input-text v-model="config.channel" id="channel" placeholder="Channel Name"
-                            label="Channel Name"></input-text>
-            </div>
-        </div>
-        <div class="row mt-2">
-            <div class="col">
-                <app-button v-if="!isIrcConnected()" class="btn-success" label="Connect"
-                            @click="connectIrc()"></app-button>
-                <app-button v-else class="btn-danger" label="Disconnect" @click="disconnectIrc()"></app-button>
-            </div>
-        </div>
-    </settings-section>
-
     <div class="row">
         <div class="col">
-            <settings-section title="Speech Settings">
-                <input-slider-percentage
-                        v-model.number="config.speechVolume" id="volume" placeholder="Volume" label="Volume" max="1"
-                ></input-slider-percentage>
-                <input-slider-percentage
-                        v-model.number="config.speechRate" id="rate" placeholder="Rate" label="Rate" max="2"
-                ></input-slider-percentage>
-                <input-slider-percentage
-                        v-model.number="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" max="2"
-                ></input-slider-percentage>
-                <app-button label="Test TTS voice" @click="tts('This is a test message')"></app-button>
+
+            <settings-section>
+                <h1 class="text-center">iceTTS - Twitch Chat TTS</h1>
             </settings-section>
-        </div>
-        <div class="col">
+
             <settings-section title="Language Settings">
                 <input-select
                         v-model="config.defaultLang" id="defaultLang"
@@ -59,11 +30,7 @@
                         id="multiLangScan" label="Guess language from text content"
                 ></input-checkbox>
             </settings-section>
-        </div>
-    </div>
 
-    <div class="row">
-        <div class="col">
             <settings-section title="Other Settings">
                 <input-checkbox
                         v-model="config.readUsername"
@@ -128,17 +95,54 @@
                 </modal>
             </settings-section>
         </div>
+
+        <div class="col">
+
+            <settings-section title="Channel Settings">
+                <div class="row">
+                    <div class="col">
+                        <input-text v-model="config.channel" id="channel" placeholder="Channel Name"
+                                    label="Channel Name"></input-text>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col">
+                        <app-button v-if="!isIrcConnected()" class="btn-success" label="Connect"
+                                    @click="connectIrc()"></app-button>
+                        <app-button v-else class="btn-danger" label="Disconnect" @click="disconnectIrc()"></app-button>
+                    </div>
+                </div>
+            </settings-section>
+
+            <settings-section title="Speech Settings">
+                <input-slider-percentage
+                        v-model.number="config.speechVolume" id="volume" placeholder="Volume" label="Volume" max="1"
+                ></input-slider-percentage>
+                <input-slider-percentage
+                        v-model.number="config.speechRate" id="rate" placeholder="Rate" label="Rate" max="2"
+                ></input-slider-percentage>
+                <input-slider-percentage
+                        v-model.number="config.speechPitch" id="pitch" placeholder="Pitch" label="Pitch" max="2"
+                ></input-slider-percentage>
+                <app-button label="Test TTS voice" @click="tts('This is a test message')"></app-button>
+            </settings-section>
+
+            <settings-section title="Edit Settings JSON">
+                <p>
+                    You can import/export settings from here
+                    <small class="text-muted">
+                        (or set stupid values. Ever listened to 10x speed voice?)
+                    </small>
+                </p>
+                <settings-json></settings-json>
+            </settings-section>
+            
+        </div>
     </div>
 
-    <settings-section title="Edit Settings JSON">
-        <p>
-            You can import/export settings from here
-            <small class="text-muted">
-                (or set stupid values. Ever listened to 10x speed voice?)
-            </small>
-        </p>
-        <settings-json></settings-json>
-    </settings-section>
+    <div class="text-center">
+        <small><a href="https://github.com/IceDynamix/iceTTS" class="text-muted">Source Code</a></small>
+    </div>
 
     <toast id="toast-connected">
         Connected to Twitch
