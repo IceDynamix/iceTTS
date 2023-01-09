@@ -292,6 +292,8 @@ const app = createApp({
             this.ircClient.on("chat", (target, context, msg, self) => {
                 if (self) return;
 
+                if (!this.isAllowedToSpeak(context)) return;
+
                 msg = this.performReplacements(msg);
                 if (this.config.readUsername) {
                     let username = this.getUsernameReading(context);
@@ -321,6 +323,21 @@ const app = createApp({
 
         isIrcConnected() {
             return this.ircClient != null;
+        },
+
+        isAllowedToSpeak(context) {
+            const displayName = context["display-name"];
+            const twitchName = context["username"];
+
+            for (const name of [displayName, twitchName]) {
+                if (this.config.enableBlacklist && this.config.blacklist.includes(name))
+                    return false;
+
+                if (this.config.enableWhitelist && !this.config.whitelist.includes(name))
+                    return false;
+            }
+
+            return true;
         },
 
         performReplacements(msg) {
@@ -508,42 +525,60 @@ app.component("settings-json", {
 });
 
 app.component('list-table', {
-    props: ['list', 'default'],
+    props: ['modelValue', 'default', 'columns', 'toColumns', 'toObj'],
+    emits: ['update:modelValue'],
     data() {
         return {
-            items: this.list,
-            newItem: this.default
+            defaultItem: this.default,
+            currentItemColumns: this.toColumns(this.default),
         }
     },
     template: `
       <table class="table">
       <thead>
       <tr>
-        <slot name="header"></slot>
+        <th v-for="column in columns">
+          {{ column }}
+        </th>
         <th></th>
       </tr>
       </thead>
       <tbody>
-      <template v-for="(item, i) in items" :key="i">
+      <template v-for="(item, i) in modelValue" :key="i">
         <tr>
-          <slot name="item" :item="item" :index="i"></slot>
+          <td v-for="column in toColumns(item)">
+            <kbd>{{column.replaceAll(' ', '&nbsp')}}</kbd>
+          </td>
           <td>
-            <button @click="remove(i)" class="btn btn-danger">-</button>
+            <button @click="remove(i)" class="btn btn-danger btn-sm">-</button>
           </td>
         </tr>
       </template>
+      <tr>
+        <td v-for="(column, i) in currentItemColumns">
+          <input-text v-model="currentItemColumns[i]" :placeholder="columns[i]"></input-text>
+        </td>
+        <td>
+          <button @click="add()" class="btn btn-success">Add</button>
+        </td>
+      </tr>
       </tbody>
       </table>
       <p>
-      <button @click="add()" class="btn btn-success">Add</button>
       </p>
     `,
     methods: {
         add() {
-            this.items.push(this.newItem);
+            this.save([...this.modelValue, this.toObj(this.currentItemColumns)]);
+            this.currentItemColumns = this.toColumns(this.defaultItem);
         },
         remove(i) {
-            this.items.splice(i, 1);
+            const list = [...this.modelValue];
+            list.splice(i, 1);
+            this.save(list)
+        },
+        save(list) {
+            this.$emit('update:modelValue', list);
         }
     }
 });

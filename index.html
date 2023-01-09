@@ -45,19 +45,10 @@
                             Read someone's username as something else. Maybe their name is too long, hard to
                             pronounce or maybe mispronounced?
                         </p>
-                        <list-table :list="config.usernameAliases" :default="{username: '', alias: ''}">
-                            <template v-slot:header>
-                                <th>Username</th>
-                                <th>Alias</th>
-                            </template>
-                            <template v-slot:item="{item, index}">
-                                <td>
-                                    <input-text v-model="item.username" placeholder="Find"></input-text>
-                                </td>
-                                <td>
-                                    <input-text v-model="item.alias" placeholder="Replace"></input-text>
-                                </td>
-                            </template>
+                        <list-table v-model="config.usernameAliases" :default="{username:'', alias:''}"
+                                    :columns="['Username', 'Alias']"
+                                    :to-columns="({username, alias}) => [username, alias]"
+                                    :to-obj="([username, alias]) => ({username, alias})">
                         </list-table>
                     </template>
                 </modal>
@@ -84,19 +75,10 @@
                             <li>Limiting messages to 150 characters</li>
                         </ul>
                         <p>Some other applications include fixing mispronounced words or expanding abbreviations</p>
-                        <list-table :list="config.replacements" :default="{find: '', replace: ''}">
-                            <template v-slot:header>
-                                <th>Find</th>
-                                <th>Replace</th>
-                            </template>
-                            <template v-slot:item="{item, index}">
-                                <td>
-                                    <input-text v-model="item.find" placeholder="Find"></input-text>
-                                </td>
-                                <td>
-                                    <input-text v-model="item.replace" placeholder="Replace"></input-text>
-                                </td>
-                            </template>
+                        <list-table v-model="config.replacements" :default="{find:'', replace:''}"
+                                    :columns="['Find', 'Replace']"
+                                    :to-columns="({find, replace}) => [find, replace]"
+                                    :to-obj="([find, replace]) => ({find, replace})">
                         </list-table>
                         <input-checkbox
                                 v-model="config.useRegex"
@@ -118,15 +100,8 @@
                             Someone's been naughty? Or maybe you don't want to read out bots? Put their name in here!
                             Messages from users in this list will not be read out.
                         </p>
-                        <list-table :list="config.blacklist" :default="''">
-                            <template v-slot:header>
-                                <th>Username</th>
-                            </template>
-                            <template v-slot:item="{item, index}">
-                                <td>
-                                    <input-text v-model="item" placeholder="Username"></input-text>
-                                </td>
-                            </template>
+                        <list-table v-model="config.blacklist" :default="''"
+                                    :columns="['Username']" :to-columns="(item) => [item]" :to-obj="([item]) => item">
                         </list-table>
                     </template>
                 </modal>
@@ -144,15 +119,8 @@
                             What about the other way around? Maybe you only want to allow messages from specific
                             people? If enabled, then <i>only</i> messages from users in this list will be read out.
                         </p>
-                        <list-table :list="config.whitelist" :default="''">
-                            <template v-slot:header>
-                                <th>Username</th>
-                            </template>
-                            <template v-slot:item="{item, index}">
-                                <td>
-                                    <input-text v-model="item" placeholder="Username"></input-text>
-                                </td>
-                            </template>
+                        <list-table v-model="config.whitelist" :default="''"
+                                    :columns="['Username']" :to-columns="(item) => [item]" :to-obj="([item]) => item">
                         </list-table>
                     </template>
                 </modal>
