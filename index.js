@@ -335,7 +335,7 @@ const app = createApp({
             }
 
             if (this.config.enableWhitelist) {
-                if (!(this.config.whitelist.contains(displayName) || this.config.whitelist.contains(twitchName))) {
+                if (!(this.config.whitelist.includes(displayName) || this.config.whitelist.includes(twitchName))) {
                     return false;
                 }
             }
@@ -550,7 +550,7 @@ app.component('list-table', {
       <template v-for="(item, i) in modelValue" :key="i">
         <tr>
           <td v-for="column in toColumns(item)">
-            <kbd>{{column.replaceAll(' ', '&nbsp')}}</kbd>
+            <kbd>{{ column.replaceAll(' ', '&nbsp') }}</kbd>
           </td>
           <td>
             <button @click="remove(i)" class="btn btn-danger btn-sm">-</button>
@@ -558,7 +558,7 @@ app.component('list-table', {
         </tr>
       </template>
       <tr>
-        <td v-for="(column, i) in currentItemColumns">
+        <td v-for="(_, i) in currentItemColumns">
           <input-text v-model="currentItemColumns[i]" :placeholder="columns[i]"></input-text>
         </td>
         <td>
